@@ -1,0 +1,90 @@
+[
+  {
+    "attr": "yearBuilt",
+    "variables": {
+      "postkolonijny": [1850, 1850, 1890, 1920],
+      "neoklasycyzm": [1905, 1910, 1918, 1930],
+      "modernistyczny": [1915, 1920, 1940, 1950],
+      "postmodernistyczny": [1945, 1950, 2020, 2020],
+      "współczesny": [1990, 2000, 2020, 2020]
+    }
+  },
+  {
+    "attr": "lot",
+    "variables": {
+      "bardzo mała": [435, 435, 1800, 2000],
+      "mała": [1800, 2000, 4000, 5000],
+      "średnia": [4000, 5000, 8000, 10000],
+      "duża": [8000, 10000, 17000, 20000],
+      "bardzo duża": [17000, 20000, 3E8, 3E8]
+    }
+  },
+  {
+    "attr": "totalInteriorLivableArea",
+    "variables": {
+      "bardzo mała": [400, 400, 500, 600],
+      "mała": [500, 600, 1200, 1300],
+      "średnie": [1200, 1300, 2000, 2200],
+      "duże": [2000, 2200, 3200, 3500],
+      "bardzo duże": [3200, 3500, 16000, 16000]
+    }
+  },
+  {
+    "attr": "elementarySchoolDistance",
+    "variables": {
+      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
+      "blisko": [0.5, 1.0, 2.5, 3.0],
+      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
+      "daleko": [5.0, 6.5, 9.0, 10.0],
+      "bardzo daleko": [9.0, 10.0, 47.3, 47.3]
+    }
+  },
+  {
+    "attr": "middleSchoolDistance",
+    "variables": {
+      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
+      "blisko": [0.5, 1.0, 2.5, 3.0],
+      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
+      "daleko": [5.0, 6.5, 9.0, 10.0],
+      "bardzo daleko": [9.0, 10.0, 47.4, 47.4]
+    }
+  },
+  {
+    "attr": "highSchoolDistance",
+    "variables": {
+      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
+      "blisko": [0.5, 1.0, 2.5, 3.0],
+      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
+      "daleko": [5.0, 6.5, 9.0, 10.0],
+      "bardzo daleko": [9.0, 10.0, 47.3, 47.3]
+    }
+  },
+  {
+    "attr": "taxAssessedValue",
+    "variables": {
+
+    }
+  },
+  {
+    "attr": "annualTaxAmount",
+    "variables": {
+
+    }
+  },
+  {
+    "attr": "listedPrice",
+    "variables": {
+    }
+  },
+  {
+    "attr": "lastSoldPrice",
+    "variables": {
+    }
+  },
+  {
+    "attr": "soldPrice",
+    "variables": {
+    }
+  }
+]
+
