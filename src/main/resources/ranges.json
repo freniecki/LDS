@@ -1,17 +1,17 @@
 [
   {
-    "attr": "yearBuilt",
-    "variables": {
-      "postkolonijny": [1850, 1850, 1890, 1920],
-      "neoklasycyzm": [1905, 1910, 1918, 1930],
-      "modernistyczny": [1915, 1920, 1940, 1950],
-      "postmodernistyczny": [1945, 1950, 2020, 2020],
-      "współczesny": [1990, 2000, 2020, 2020]
+    "name": "yearBuilt",
+    "ranges": {
+      "przedwojenny": [1850, 1850, 1918, 1941],
+      "powojenny": [1918, 1941, 1955, 1960],
+      "modernistyczny": [1955, 1960, 1970, 1980],
+      "postmodernistyczny": [1970, 1980, 2000, 2010],
+      "współczesny": [1995, 2010, 2020, 2020]
     }
   },
   {
-    "attr": "lot",
-    "variables": {
+    "name": "lot",
+    "ranges": {
       "bardzo mała": [435, 435, 1800, 2000],
       "mała": [1800, 2000, 4000, 5000],
       "średnia": [4000, 5000, 8000, 10000],
@@ -20,18 +20,18 @@
     }
   },
   {
-    "attr": "totalInteriorLivableArea",
-    "variables": {
+    "name": "totalInteriorLivableArea",
+    "ranges": {
       "bardzo mała": [400, 400, 500, 600],
       "mała": [500, 600, 1200, 1300],
-      "średnie": [1200, 1300, 2000, 2200],
-      "duże": [2000, 2200, 3200, 3500],
-      "bardzo duże": [3200, 3500, 16000, 16000]
+      "średnia": [1200, 1300, 2000, 2200],
+      "duża": [2000, 2200, 3200, 3500],
+      "bardzo duża": [3200, 3500, 16000, 16000]
     }
   },
   {
-    "attr": "elementarySchoolDistance",
-    "variables": {
+    "name": "elementarySchoolDistance",
+    "ranges": {
       "bardzo blisko": [0.1, 0.1, 0.5,1.0],
       "blisko": [0.5, 1.0, 2.5, 3.0],
       "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
@@ -40,8 +40,8 @@
     }
   },
   {
-    "attr": "middleSchoolDistance",
-    "variables": {
+    "name": "middleSchoolDistance",
+    "ranges": {
       "bardzo blisko": [0.1, 0.1, 0.5,1.0],
       "blisko": [0.5, 1.0, 2.5, 3.0],
       "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
@@ -50,8 +50,8 @@
     }
   },
   {
-    "attr": "highSchoolDistance",
-    "variables": {
+    "name": "highSchoolDistance",
+    "ranges": {
       "bardzo blisko": [0.1, 0.1, 0.5,1.0],
       "blisko": [0.5, 1.0, 2.5, 3.0],
       "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
@@ -60,30 +60,30 @@
     }
   },
   {
-    "attr": "taxAssessedValue",
-    "variables": {
+    "name": "taxAssessedValue",
+    "ranges": {
+      "": []
+    }
+  },
+  {
+    "name": "annualTaxAmount",
+    "ranges": {
 
     }
   },
   {
-    "attr": "annualTaxAmount",
-    "variables": {
-
+    "name": "listedPrice",
+    "ranges": {
     }
   },
   {
-    "attr": "listedPrice",
-    "variables": {
+    "name": "lastSoldPrice",
+    "ranges": {
     }
   },
   {
-    "attr": "lastSoldPrice",
-    "variables": {
-    }
-  },
-  {
-    "attr": "soldPrice",
-    "variables": {
+    "name": "soldPrice",
+    "ranges": {
     }
   }
 ]
