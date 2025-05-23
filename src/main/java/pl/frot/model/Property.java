@@ -31,15 +31,15 @@ public class Property {
     @CsvBindByName(column = "High School Distance")
     Double highSchoolDistance;
 
-    @CsvBindByName(column = "Tax assessed value")
-    Double taxAssessedValue;
     @CsvBindByName(column = "Annual tax amount")
     Double annualTaxAmount;
 
-    @CsvBindByName(column = "Listed Price")
-    Double listedPrice;
+    @CsvBindByName(column = "Tax assessed value")
+    Double taxAssessedValue;
     @CsvBindByName(column = "Last Sold Price")
     Double lastSoldPrice;
+    @CsvBindByName(column = "Listed Price")
+    Double listedPrice;
     @CsvBindByName(column = "Sold Price")
     Double soldPrice;
 }
