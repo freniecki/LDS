@@ -18,5 +18,9 @@ class DataLoaderTest {
         double avg = attributes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
 
         System.out.println("Min: " + min + " | Max: " + max + " | Avg: " + avg);
+        System.out.println("[===============================================]");
+        for ( double attribute : attributes) {
+            System.out.print(attribute + " | ");
+        }
     }
 }
