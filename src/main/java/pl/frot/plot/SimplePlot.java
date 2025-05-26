@@ -110,6 +110,39 @@ public class SimplePlot extends JPanel {
                 plot.chart.getXYPlot().setDomainAxis(xAxis);
             }
 
+            if (ranges.name().equals("annualTaxAmount")) {
+                LogAxis xAxis = new LogAxis("Wartość rocznego podatku ($) (skala log.)");
+                xAxis.setBase(10);
+                xAxis.setRange(50, 600000); // od 50 do 600,000
+                plot.chart.getXYPlot().setDomainAxis(xAxis);
+            }
+            if (ranges.name().equals("taxAssessedValue")) {
+                LogAxis xAxis = new LogAxis("Cena estymowana na podstawie podatku ($) (skala log.)");
+                xAxis.setBase(10);
+                xAxis.setRange(10000, 50000000); //  zakres do 50M
+                plot.chart.getXYPlot().setDomainAxis(xAxis);
+            }
+            if (ranges.name().equals("listedPrice")) {
+                LogAxis xAxis = new LogAxis("Cena oferty ($) (skala log.)");
+                xAxis.setBase(10);
+                xAxis.setRange(1000, 60000000); // od 1k do 60M (z marginesem)
+                plot.chart.getXYPlot().setDomainAxis(xAxis);
+            }
+
+            if (ranges.name().equals("lastSoldPrice")) {
+                LogAxis xAxis = new LogAxis("Ostatnia cena sprzedaży ($) (skala log.)");
+                xAxis.setBase(10);
+                xAxis.setRange(900, 45000000); // od 900 do 45M (z marginesem)
+                plot.chart.getXYPlot().setDomainAxis(xAxis);
+            }
+
+            if (ranges.name().equals("soldPrice")) {
+                LogAxis xAxis = new LogAxis("Cena sprzedaży ($) (skala log.)");
+                xAxis.setBase(10);
+                xAxis.setRange(90000, 100000000); // od 90k do 100M (z marginesem)
+                plot.chart.getXYPlot().setDomainAxis(xAxis);
+            }
+
             for (Map.Entry<String, List<Double>> variable : ranges.ranges().entrySet()) {
                 String name = variable.getKey();
                 double a = variable.getValue().getFirst();
@@ -118,7 +151,7 @@ public class SimplePlot extends JPanel {
 
                 XYSeries series = switch (variable.getValue().size()) {
                     case 3:
-                         yield plot.createTriangularSeries(name, a, b, c);
+                        yield plot.createTriangularSeries(name, a, b, c);
                     case 4:
                         double d = variable.getValue().get(3);
                         yield plot.createTrapezoidalSeries(name, a, b, c, d);
@@ -163,10 +196,12 @@ public class SimplePlot extends JPanel {
     public static void main(String[] args) throws IOException {
         List<AttrRanges> ranges = getAttrRanges("src/main/resources/ranges.json");
 
-        plot(
-                "Powierzchnia_użytkowa",
-                "src/main/resources/plot",
-                ranges.get(2)
-        );
+        //plot("Powierzchnia_użytkowa", "src/main/resources/plot", ranges.get(2));
+        //plot("Wartość rocznego podatku", "src/main/resources/plot", ranges.get(7) //);
+        //plot("Cena estymowana na podstawie podatku", "src/main/resources/plot", ranges.get(6));
+        //plot("Cena wystawiona", "src/main/resources/plot", ranges.get(8));
+        //plot("Ostatnia cena sprzedaży", "src/main/resources/plot", ranges.get(9));
+        plot("Cena sprzedaży", "src/main/resources/plot", ranges.get(10));
     }
+
 }

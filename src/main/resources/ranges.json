@@ -62,28 +62,46 @@
   {
     "name": "taxAssessedValue",
     "ranges": {
-      "": []
+      "niska wycena": [14569, 14569, 200000, 400000],
+      "umiarkowana wycena": [300000, 500000, 1500000, 2000000],
+      "wysoka wycena": [1500000, 2500000, 8000000, 12000000],
+      "bardzo wysoka wycena": [10000000, 15000000, 43890886, 43890886]
     }
   },
   {
     "name": "annualTaxAmount",
     "ranges": {
-
+      "niski podatek": [60, 60, 2500, 4000],
+      "umiarkowany podatek": [3000, 4500, 7000, 9000],
+      "wysoki podatek": [7500, 10000, 18000, 22000],
+      "bardzo wysoki podatek": [20000, 25000, 528249, 528249]
     }
   },
   {
     "name": "listedPrice",
     "ranges": {
+      "segment budżetowy": [1499, 1499, 500000, 800000],
+      "segment średni": [600000, 1000000, 3000000, 4000000],
+      "segment premium": [3500000, 5000000, 15000000, 20000000],
+      "segment luksusowy": [18000000, 25000000, 52000000, 52000000]
     }
   },
   {
     "name": "lastSoldPrice",
     "ranges": {
+      "sprzedaż budżetowa": [1000, 1000, 400000, 600000],
+      "sprzedaż standardowa": [500000, 700000, 1500000, 2000000],
+      "sprzedaż droga": [1800000, 2500000, 8000000, 12000000],
+      "sprzedaż luksusowa": [10000000, 15000000, 38980389, 38980389]
     }
   },
   {
     "name": "soldPrice",
     "ranges": {
+      "sprzedaż przystępna": [100500, 100500, 700000, 1000000],
+      "sprzedaż średnia": [800000, 1200000, 3000000, 4000000],
+      "sprzedaż wysoka": [3500000, 5000000, 20000000, 25000000],
+      "sprzedaż ekstremalnie wysoka": [22000000, 30000000, 90000000, 90000000]
     }
   }
 ]
