@@ -34,7 +34,7 @@ public class SimplePlot extends JPanel {
 
         chart = ChartFactory.createXYLineChart(
                 title,
-                "Wiek",
+                title,
                 "Przynależność",
                 dataset,
                 PlotOrientation.VERTICAL,
@@ -89,7 +89,7 @@ public class SimplePlot extends JPanel {
 
     private static void plot(String title, String dirPath, AttrRanges ranges) {
         SwingUtilities.invokeLater(() -> {
-            SimplePlot plot = new SimplePlot("Zmienna lingwistyczna: %s".formatted(title), dirPath);
+            SimplePlot plot = new SimplePlot(title, dirPath);
 
             if (ranges.name().equals("lot")) {
                 LogAxis xAxis = new LogAxis("Powierzchnia działki (skala log.)");
@@ -130,7 +130,7 @@ public class SimplePlot extends JPanel {
                 plot.setColor(plot.dataset.getSeriesCount() - 1, getPrettyPastelColor());
             }
 
-            showPlot(title, plot);
+            //showPlot(title, plot);
             saveToFile(title, plot);
         });
     }
@@ -161,12 +161,12 @@ public class SimplePlot extends JPanel {
     }
 
     public static void main(String[] args) throws IOException {
-        List<AttrRanges> ranges = getAttrRanges("src/main/resources/ranges.json");
+        List<AttrRanges> ranges = getAttrRanges("src/main/resources/quantifiers.json");
 
         plot(
-                "Powierzchnia_użytkowa",
+                "Kwantyfikatory względne",
                 "src/main/resources/plot",
-                ranges.get(2)
+                ranges.get(1)
         );
     }
 }
