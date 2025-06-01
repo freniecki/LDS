@@ -11,16 +11,16 @@ public class FuzzySet {
 
     }
 
-    ClassicSet getUniverseOfDiscourse() {
-        return new ClassicSet();
+    CrispSet getUniverseOfDiscourse() {
+        return new CrispSet();
     }
 
     /**
      * Retrieves elements of the fuzzy set that membership is greater than 0. (2.28)
      * @return Set of elements
      */
-    ClassicSet getSupport() {
-        return new ClassicSet();
+    CrispSet getSupport() {
+        return new CrispSet();
     }
 
     /**
@@ -29,8 +29,8 @@ public class FuzzySet {
      * @param alpha the threshold value for membership degree
      * @return Set of elements
      */
-    ClassicSet getAlphaCut(Double alpha) {
-        return new ClassicSet();
+    CrispSet getAlphaCut(Double alpha) {
+        return new CrispSet();
     }
 
     /**

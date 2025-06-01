@@ -7,13 +7,13 @@ import java.util.List;
  * - universe of discourse
  * -
  */
-public class ClassicSet {
+public class CrispSet {
 
     private boolean isDense = false;
 
     private List<Double> universeOfDiscourse;
 
-    ClassicSet() {
+    CrispSet() {
 
     }
 
@@ -21,16 +21,16 @@ public class ClassicSet {
         isDense = dense;
     }
 
-    public ClassicSet getComplementOfSet() {
-        return new ClassicSet();
+    public CrispSet getComplementOfSet() {
+        return new CrispSet();
     }
 
-    public static ClassicSet sumOfClassicSets(ClassicSet a, ClassicSet b) {
-        return new ClassicSet();
+    public static CrispSet sumOfClassicSets(CrispSet a, CrispSet b) {
+        return new CrispSet();
     }
 
-    public static ClassicSet intersectionOfClassicSets(ClassicSet a, ClassicSet b) {
-        return new ClassicSet();
+    public static CrispSet intersectionOfClassicSets(CrispSet a, CrispSet b) {
+        return new CrispSet();
     }
 
     public double getSupremum() {
