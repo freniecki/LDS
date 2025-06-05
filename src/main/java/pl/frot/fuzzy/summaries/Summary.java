@@ -14,12 +14,12 @@ public class Summary {
     public double degreeOfTruth() {
         double sigmaCount = compoundSummarizer.fuzzySet.getSigmaCount();
 
-        double M = switch (quantifier.type) {
+        double M = switch (quantifier.type()) {
             case ABSOLUTE -> 1.0;
             case RELATIVE -> compoundSummarizer.fuzzySet.getUniverse().getSamples().size();
         };
 
-        return quantifier.fuzzySet.membership(sigmaCount / M);
+        return quantifier.fuzzySet().membership(sigmaCount / M);
     }
 
     public double degreeOfImprecision() {
