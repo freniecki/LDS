@@ -1,4 +1,4 @@
-package pl.frot.plot;
+package pl.frot;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +13,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import pl.frot.model.AttrRanges;
+import pl.frot.data.TermDao;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +34,7 @@ public class SimplePlot extends JPanel {
 
         chart = ChartFactory.createXYLineChart(
                 title,
-                "Wiek",
+                title,
                 "Przynależność",
                 dataset,
                 PlotOrientation.VERTICAL,
@@ -87,9 +87,9 @@ public class SimplePlot extends JPanel {
         return Color.getHSBColor(hue, saturation, luminance);
     }
 
-    private static void plot(String title, String dirPath, AttrRanges ranges) {
+    private static void plot(String title, String dirPath, TermDao ranges) {
         SwingUtilities.invokeLater(() -> {
-            SimplePlot plot = new SimplePlot("Zmienna lingwistyczna: %s".formatted(title), dirPath);
+            SimplePlot plot = new SimplePlot(title, dirPath);
 
             if (ranges.name().equals("lot")) {
                 LogAxis xAxis = new LogAxis("Powierzchnia działki (skala log.)");
@@ -163,13 +163,13 @@ public class SimplePlot extends JPanel {
                 plot.setColor(plot.dataset.getSeriesCount() - 1, getPrettyPastelColor());
             }
 
-            showPlot(title, plot);
+            //showPlot(title, plot);
             saveToFile(title, plot);
         });
     }
 
     private static void showPlot(String title, SimplePlot plot) {
-        JFrame frame = new JFrame("Zmienna lingwistyczna - %s".formatted(title));
+        JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
         frame.setContentPane(plot);
@@ -186,7 +186,7 @@ public class SimplePlot extends JPanel {
         }
     }
 
-    private static List<AttrRanges> getAttrRanges(String jsonPath) throws IOException {
+    private static List<TermDao> getAttrRanges(String jsonPath) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(
                 Path.of(jsonPath).toFile(),
@@ -194,14 +194,9 @@ public class SimplePlot extends JPanel {
     }
 
     public static void main(String[] args) throws IOException {
-        List<AttrRanges> ranges = getAttrRanges("src/main/resources/ranges.json");
+        List<TermDao> ranges = getAttrRanges("src/main/resources/summarizers.json");
 
-        //plot("Powierzchnia_użytkowa", "src/main/resources/plot", ranges.get(2));
-        //plot("Wartość rocznego podatku", "src/main/resources/plot", ranges.get(7) //);
-        //plot("Cena estymowana na podstawie podatku", "src/main/resources/plot", ranges.get(6));
-        //plot("Cena wystawiona", "src/main/resources/plot", ranges.get(8));
-        //plot("Ostatnia cena sprzedaży", "src/main/resources/plot", ranges.get(9));
-        plot("Cena sprzedaży", "src/main/resources/plot", ranges.get(10));
+        plot("Odległość od najbliższej szkoły średniej", "src/main/resources/plot", ranges.get(5));
     }
 
 }

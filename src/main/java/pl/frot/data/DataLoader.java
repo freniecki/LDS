@@ -1,18 +1,23 @@
 package pl.frot.data;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.CsvToBeanBuilder;
 import jakarta.persistence.EntityManager;
-import pl.frot.model.Property;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class DataLoader {
 
     private DataLoader() {}
 
-    public static List<Property> getDataFromCSV(String path) throws FileNotFoundException {
+    // ==== FILE READING ====
+
+    public static List<Property> loadProperties(String path) throws FileNotFoundException {
         List<Property> properties = new CsvToBeanBuilder<Property>(new FileReader(path))
                 .withType(Property.class)
                 .build()
@@ -32,6 +37,16 @@ public class DataLoader {
                 .filter(p -> p.getSoldPrice() != null && p.getSoldPrice() > 0)
                 .toList();
     }
+
+    public static List<TermDao> loadTerms(String path) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(
+                Path.of(path).toFile(),
+                new TypeReference<>(){}
+        );
+    }
+
+    // ==== DB WRITING ====
 
     public static void saveToDB(List<Property> properties) {
         try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {

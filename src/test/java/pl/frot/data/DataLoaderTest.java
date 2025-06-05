@@ -1,15 +1,14 @@
 package pl.frot.data;
 
-import pl.frot.model.Property;
-
 import java.io.FileNotFoundException;
 import java.util.List;
 
 class DataLoaderTest {
     public static void main(String[] args) throws FileNotFoundException {
-        List<Property> properties = DataLoader.getDataFromCSV("src/main/resources/property.csv");
+        List<Property> properties = DataLoader.loadProperties("src/main/resources/property.csv");
 
-        printInfo(properties.stream().map(Property::getHighSchoolDistance).sorted().toList());
+        System.out.println("size: " + properties.size());
+        //printInfo(properties.stream().map(Property::getHighSchoolDistance).sorted().toList());
     }
 
     private static void printInfo(List<Double> attributes) {

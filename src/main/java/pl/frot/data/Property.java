@@ -1,4 +1,4 @@
-package pl.frot.model;
+package pl.frot.data;
 
 import com.opencsv.bean.CsvBindByName;
 import jakarta.persistence.*;

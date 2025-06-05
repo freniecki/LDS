@@ -12,51 +12,51 @@
   {
     "name": "lot",
     "ranges": {
-      "bardzo mała": [435, 435, 1800, 2000],
-      "mała": [1800, 2000, 4000, 5000],
-      "średnia": [4000, 5000, 8000, 10000],
-      "duża": [8000, 10000, 17000, 20000],
-      "bardzo duża": [17000, 20000, 3E8, 3E8]
+      "kompaktowa": [435, 435, 1800, 2000],
+      "przytulna": [1800, 2000, 4000, 5000],
+      "przestronna": [4000, 5000, 8000, 10000],
+      "obszerna": [8000, 10000, 17000, 20000],
+      "rozległa": [17000, 20000, 3E8, 3E8]
     }
   },
   {
     "name": "totalInteriorLivableArea",
     "ranges": {
-      "bardzo mała": [400, 400, 500, 600],
-      "mała": [500, 600, 1200, 1300],
-      "średnia": [1200, 1300, 2000, 2200],
-      "duża": [2000, 2200, 3200, 3500],
-      "bardzo duża": [3200, 3500, 16000, 16000]
+      "kawalerski metraż": [400, 400, 500, 600],
+      "małe mieszkanie": [500, 600, 1200, 1300],
+      "przestrzenne": [1200, 1300, 2000, 2200],
+      "ponad standard": [2000, 2200, 3200, 3500],
+      "ogromne": [3200, 3500, 16000, 16000]
     }
   },
   {
     "name": "elementarySchoolDistance",
     "ranges": {
-      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
-      "blisko": [0.5, 1.0, 2.5, 3.0],
-      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
-      "daleko": [5.0, 6.5, 9.0, 10.0],
-      "bardzo daleko": [9.0, 10.0, 47.3, 47.3]
+      "za rogiem": [0.1, 0.1, 0.5, 1.0],
+      "piechotą": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
+      "rowerem": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
     "name": "middleSchoolDistance",
     "ranges": {
-      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
-      "blisko": [0.5, 1.0, 2.5, 3.0],
-      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
-      "daleko": [5.0, 6.5, 9.0, 10.0],
-      "bardzo daleko": [9.0, 10.0, 47.4, 47.4]
+      "za rogiem": [0.1, 0.1, 0.5, 1.0],
+      "piechotą": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
+      "rowerem": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
     "name": "highSchoolDistance",
     "ranges": {
-      "bardzo blisko": [0.1, 0.1, 0.5,1.0],
-      "blisko": [0.5, 1.0, 2.5, 3.0],
-      "umiarkowanie daleko": [2.5, 3.0, 5.0, 6.5],
-      "daleko": [5.0, 6.5, 9.0, 10.0],
-      "bardzo daleko": [9.0, 10.0, 47.3, 47.3]
+      "za rogiem": [0.1, 0.1, 0.5, 1.0],
+      "piechotą": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
+      "rowerem": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
