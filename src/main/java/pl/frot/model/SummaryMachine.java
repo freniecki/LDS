@@ -4,10 +4,8 @@ import pl.frot.data.Property;
 import pl.frot.data.TermDao;
 import pl.frot.data.DataLoader;
 import pl.frot.fuzzy.base.*;
-import pl.frot.fuzzy.summaries.Label;
-import pl.frot.fuzzy.summaries.LinguisticVariable;
-import pl.frot.fuzzy.summaries.Quantifier;
-import pl.frot.fuzzy.summaries.QuantifierType;
+import pl.frot.fuzzy.summaries.*;
+import pl.frot.utils.SetOperations;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,17 +18,29 @@ public class SummaryMachine {
 
     private static final Logger logger = Logger.getLogger(SummaryMachine.class.getName());
 
-    List<Property> properties;
-    List<LinguisticVariable> linguisticVariables;
-    List<Quantifier> quantifiers;
+    List<Property> properties = new ArrayList<>();
+    List<LinguisticVariable> linguisticVariables = new ArrayList<>();
+    List<List<Label>> labelCombinations = new ArrayList<>();
+    List<Quantifier> quantifiers = new ArrayList<>();
+
+    List<SingleSubjectSummary> summaries = new ArrayList<>();
+    List<MultisubjectSummary> multisubjectSummaries = new ArrayList<>();
+
+
+    public static void main(String[] args) {
+        SummaryMachine sm = new SummaryMachine();
+        sm.run();
+    }
 
     public void run() {
         if (!loadData()) {
             logger.warning("Failed to load data");
             return;
         }
-
         logger.info("Loaded data successfully");
+
+        createFirstTypeSingleSubjectSummaries();
+        logger.info(String.format("Created %s I type single subject summaries.", summaries.size()));
     }
 
     // ==== DATA LOADING ====
@@ -79,6 +89,13 @@ public class SummaryMachine {
             }
             linguisticVariables.add(new LinguisticVariable(name, labels));
         }
+
+        List<Label> allLabels = new ArrayList<>();
+        for (LinguisticVariable linguisticVariable : linguisticVariables) {
+            allLabels.addAll(linguisticVariable.labels());
+        }
+
+        labelCombinations = SetOperations.getCombinations(allLabels, 4);
     }
 
     private void loadQuantifiers(List<TermDao> quantifiersDao) {
@@ -115,5 +132,18 @@ public class SummaryMachine {
         );
     }
 
-    // ==== ... ====
+    // ==== SUMMARIZING ====
+
+    public void createFirstTypeSingleSubjectSummaries() {
+        for (Quantifier quantifier : quantifiers) {
+            for (List<Label> labelCombination : labelCombinations) {
+                summaries.add(new SingleSubjectSummary(
+                        quantifier,
+                        null,
+                        labelCombination,
+                        null
+                ));
+            }
+        }
+    }
 }

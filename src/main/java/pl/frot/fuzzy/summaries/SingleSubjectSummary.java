@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @AllArgsConstructor
-public class Summary {
+public class SingleSubjectSummary {
     private Quantifier quantifier;
     private Label qualifier;
     private List<Label> summarizers;
@@ -71,5 +71,24 @@ public class Summary {
 
     public double qualifierLength() {
         return 0.0;
+    }
+
+    @Override
+    public String toString() {
+        String qualifierValue = "";
+        if (qualifier != null) {
+            qualifierValue = " będących " + qualifier.name;
+        }
+
+        StringBuilder summarizerValue = new StringBuilder(" jest ");
+        summarizerValue.append(summarizers.getFirst().name);
+        for (int i = 1; i < summarizers.size(); i++) {
+            summarizerValue.append(" i ").append(summarizers.get(i).name);
+        }
+
+        return quantifier.name()
+                + " nieruchomości"
+                + qualifierValue
+                + summarizerValue;
     }
 }
