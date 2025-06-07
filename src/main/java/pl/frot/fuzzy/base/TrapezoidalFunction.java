@@ -18,12 +18,14 @@ public class TrapezoidalFunction implements MembershipFunction<Double> {
 
     @Override
     public double apply(Double x) {
-        if (x >= a && x <= b) {
-            return (x - a) / (b - a);
-        } else if (x >= c && x <= d) {
-            return (d - x) / (d - c);
-        } else {
+        if (x <= a || x >= d) {
             return 0.0;
+        } else if (x <= b) {
+            return (x - a) / (b - a);
+        } else if (x <= c) {
+            return 1.0;
+        } else {
+            return (d - x) / (d - c);
         }
     }
 }

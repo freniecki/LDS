@@ -11,14 +11,16 @@ import pl.frot.utils.SetOperations;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class SummaryMachine {
 
     private static final Logger logger = Logger.getLogger(SummaryMachine.class.getName());
-
+    private Map<String, Function<Property, Double>> attributeExtractors;
     List<Property> properties = new ArrayList<>();
     @Getter
     List<LinguisticVariable> linguisticVariables = new ArrayList<>();
@@ -30,10 +32,33 @@ public class SummaryMachine {
         sm.run();
     }
 
+
+    private void initializeAttributeExtractors() {
+        attributeExtractors = new HashMap<>();
+        attributeExtractors.put("soldPrice", Property::getSoldPrice);
+        attributeExtractors.put("totalInteriorLivableArea", Property::getTotalInteriorLivableArea);
+        attributeExtractors.put("lot", Property::getLot);
+        attributeExtractors.put("yearBuilt", this::getYearBuiltAsDouble);
+        attributeExtractors.put("elementarySchoolDistance", Property::getElementarySchoolDistance);
+        attributeExtractors.put("middleSchoolDistance", Property::getMiddleSchoolDistance);
+        attributeExtractors.put("highSchoolDistance", Property::getHighSchoolDistance);
+        attributeExtractors.put("annualTaxAmount", Property::getAnnualTaxAmount);
+        attributeExtractors.put("taxAssessedValue", Property::getTaxAssessedValue);
+        attributeExtractors.put("lastSoldPrice", Property::getLastSoldPrice);
+        attributeExtractors.put("listedPrice", Property::getListedPrice);
+    }
+
+    private Double getYearBuiltAsDouble(Property property) {
+        Integer yearBuilt = property.getYearBuilt();
+        return yearBuilt != null ? yearBuilt.doubleValue() : null;
+    }
+
     public void run() {
         if (!loadData()) {
             logger.warning("Failed to load data");
+            return;
         }
+        initializeAttributeExtractors();
     }
 
     // ==== DATA LOADING ====
@@ -73,7 +98,7 @@ public class SummaryMachine {
 
     private void loadLinguisticVariables(List<TermDao> linguisticVariablesDao) {
         for (TermDao termDao : linguisticVariablesDao) {
-            String name = termDao.name();
+            String attributeName = termDao.name(); // nazwa z JSON
             List<Double> uod = termDao.uod();
             Map<String, List<Double>> ranges = termDao.ranges();
 
@@ -82,9 +107,10 @@ public class SummaryMachine {
                 String labelValue = entry.getKey();
                 FuzzySet<Double> fuzzySet = getDoubleFuzzySet(entry.getValue(), uod);
 
-                labels.add(new Label(labelValue, fuzzySet));
+                // ✅ Użyj konstruktor z attributeName
+                labels.add(new Label(labelValue, fuzzySet, attributeName));
             }
-            linguisticVariables.add(new LinguisticVariable(name, labels));
+            linguisticVariables.add(new LinguisticVariable(attributeName, labels));
         }
     }
 
@@ -124,17 +150,26 @@ public class SummaryMachine {
     // ==== SUMMARIZING ====
 
     public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
-        List<SingleSubjectSummary> summaries = new ArrayList<>();
+        logger.info("🔍 attributeExtractors keys: " + (attributeExtractors != null ? attributeExtractors.keySet() : "NULL"));
+        logger.info("🎯 Input: " + chosenQuantifiers.size() + " quantifiers, " + chosenLabels.size() + " label groups");
 
+        List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
+
+        logger.info("🔄 Generated " + labelCombinations.size() + " label combinations");
 
         for (Quantifier quantifier : chosenQuantifiers) {
             for (List<Label> labelCombination : labelCombinations) {
-                summaries.add(new SingleSubjectSummary(
+                SingleSubjectSummary summary = new SingleSubjectSummary(
                         quantifier,
                         null,
                         labelCombination
-                ));
+                );
+
+                // ✅ DODAJ TO - ustawienie danych na summary
+                summary.setData(properties, attributeExtractors);
+
+                summaries.add(summary);
             }
         }
         return summaries;

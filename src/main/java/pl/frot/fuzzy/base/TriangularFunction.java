@@ -22,12 +22,12 @@ public class TriangularFunction implements MembershipFunction<Double> {
 
     @Override
     public double apply(Double x) {
-        if (x < a || x > c) {
+        if (x <= a || x >= c) {
             return 0.0;
         }
-        if (x < b) {
-            return (b - x) / (b - a);
+        if (x <= b) {
+            return (x - a) / (b - a);
         }
-        return (x - b) / (c - b);
+        return (c - x) / (c - b);
     }
 }

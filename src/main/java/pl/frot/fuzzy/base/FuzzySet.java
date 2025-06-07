@@ -58,6 +58,23 @@ public class FuzzySet<T> {
     }
 
     public boolean isConvex() {
+        List<T> sortedSamples = domain.getSamples().stream()
+                .sorted(Comparator.comparingDouble(a -> (Double) a))
+                .toList();
+
+        for (int i = 1; i < sortedSamples.size() - 1; i++) {
+            T prev = sortedSamples.get(i - 1);
+            T curr = sortedSamples.get(i);
+            T next = sortedSamples.get(i + 1);
+
+            // Sprawdź czy μ(curr) >= min(μ(prev), μ(next))
+            double currMembership = membership(curr);
+            double expectedMin = Math.min(membership(prev), membership(next));
+
+            if (currMembership < expectedMin) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -78,7 +95,7 @@ public class FuzzySet<T> {
     }
 
     public FuzzySet<T> intersection(FuzzySet<T> other) {
-        //validateCompatibility(other);
+        validateCompatibility(other);
 
         MembershipFunction<T> intersectionFunction = x ->
                 Math.min(this.membership(x), other.membership(x));

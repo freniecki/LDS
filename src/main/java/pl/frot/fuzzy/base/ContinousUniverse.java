@@ -35,8 +35,13 @@ public class ContinousUniverse implements Universe<Double> {
     @Override
     public Set<Double> getSamples() {
         Set<Double> samples = new HashSet<>();
-        for (double val = start; val <= end; val += step) {
-            samples.add(val);
+        int numSamples = (int) Math.ceil((end - start) / step) + 1;
+
+        for (int i = 0; i < numSamples; i++) {
+            double val = start + i * step;
+            if (val <= end) {
+                samples.add(val);
+            }
         }
         return samples;
     }
