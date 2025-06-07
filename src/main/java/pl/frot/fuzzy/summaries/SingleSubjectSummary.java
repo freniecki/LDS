@@ -1,15 +1,27 @@
 package pl.frot.fuzzy.summaries;
 
-import lombok.AllArgsConstructor;
+import pl.frot.fuzzy.base.FuzzySet;
 
 import java.util.List;
 
-@AllArgsConstructor
 public class SingleSubjectSummary {
-    private Quantifier quantifier;
-    private Label qualifier;
-    private List<Label> summarizers;
+    private final Quantifier quantifier;
+    private final Label qualifier;
+    private final List<Label> summarizers;
     private Label compoundSummarizer;
+
+    public SingleSubjectSummary(Quantifier quantifier, Label qualifier, List<Label> summarizers) {
+        this.quantifier = quantifier;
+        this.qualifier = qualifier;
+        this.summarizers = summarizers;
+
+//        FuzzySet<Double> compoundFuzzySet = summarizers.getFirst().fuzzySet;
+//        for (int i = 1; i < summarizers.size(); i++) {
+//            compoundFuzzySet = compoundFuzzySet.intersection(summarizers.get(i).fuzzySet);
+//        }
+//
+//        this.compoundSummarizer = new Label("compound", compoundFuzzySet);
+    }
 
     public double degreeOfTruth() {
         double sigmaCount = compoundSummarizer.fuzzySet.getSigmaCount();
