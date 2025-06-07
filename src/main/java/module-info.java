@@ -15,4 +15,5 @@ module LDS {
 
     opens pl.frot.fx to javafx.fxml;
     opens pl.frot.data to org.hibernate.orm.core, com.opencsv, com.fasterxml.jackson.databind;
+    opens pl.frot.model to com.fasterxml.jackson.databind, com.opencsv, org.hibernate.orm.core;
 }
