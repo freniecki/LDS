@@ -4,7 +4,7 @@
 
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="pl.frot.fx.ParametersController"
+      fx:controller="pl.frot.fx.TopController"
       prefHeight="150.0" prefWidth="1920.0">
 
 

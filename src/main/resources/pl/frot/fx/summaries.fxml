@@ -4,7 +4,7 @@
 
 <ScrollPane xmlns="http://javafx.com/javafx"
     xmlns:fx="http://javafx.com/fxml"
-    fx:controller="pl.frot.fx.ParametersController"
+    fx:controller="pl.frot.fx.SummaryController"
     prefHeight="930.0" prefWidth="1520.0">
 
     <TableView fx:id="summaryTable" prefHeight="930.0" prefWidth="1520.0">
