@@ -38,4 +38,24 @@ public class SetOperations {
             current.remove(current.size() - 1);  // backtrack
         }
     }
+
+    public static <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
+        List<List<T>> result = new ArrayList<>();
+        result.add(new ArrayList<>()); // start with empty tuple
+
+        for (List<T> list : lists) {
+            List<List<T>> newResult = new ArrayList<>();
+            for (List<T> partial : result) {
+                for (T element : list) {
+                    List<T> newPartial = new ArrayList<>(partial);
+                    newPartial.add(element);
+                    newResult.add(newPartial);
+                }
+            }
+            result = newResult;
+        }
+
+        return result;
+    }
+
 }
