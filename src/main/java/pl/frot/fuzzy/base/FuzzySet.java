@@ -78,7 +78,7 @@ public class FuzzySet<T> {
     }
 
     public FuzzySet<T> intersection(FuzzySet<T> other) {
-        validateCompatibility(other);
+        //validateCompatibility(other);
 
         MembershipFunction<T> intersectionFunction = x ->
                 Math.min(this.membership(x), other.membership(x));
