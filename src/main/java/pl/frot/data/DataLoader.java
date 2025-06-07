@@ -25,7 +25,7 @@ public class DataLoader {
 
         return properties.stream()
                 .filter(p -> p.getYearBuilt() != null && p.getYearBuilt() < 2021 && p.getYearBuilt() > 1852)
-                .filter(p -> p.getLot() != null && p.getLot() > 433)
+                .filter(p -> p.getLot() != null && p.getLot() > 433 && p.getLot() < 1E6)
                 .filter(p -> p.getTotalInteriorLivableArea() != null && p.getTotalInteriorLivableArea() > 300)
                 .filter(p -> p.getElementarySchoolDistance() != null && p.getElementarySchoolDistance() > 0)
                 .filter(p -> p.getMiddleSchoolDistance() != null && p.getMiddleSchoolDistance() > 0)
