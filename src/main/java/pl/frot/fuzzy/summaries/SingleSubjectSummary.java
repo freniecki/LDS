@@ -3,35 +3,42 @@ package pl.frot.fuzzy.summaries;
 import pl.frot.fuzzy.base.FuzzySet;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class SingleSubjectSummary {
+    private static final Logger logger = Logger.getLogger(SingleSubjectSummary.class.getName());
+
     private final Quantifier quantifier;
     private final Label qualifier;
     private final List<Label> summarizers;
-    private Label compoundSummarizer;
+    private final Label compoundSummarizer;
 
     public SingleSubjectSummary(Quantifier quantifier, Label qualifier, List<Label> summarizers) {
         this.quantifier = quantifier;
         this.qualifier = qualifier;
         this.summarizers = summarizers;
 
-//        FuzzySet<Double> compoundFuzzySet = summarizers.getFirst().fuzzySet;
-//        for (int i = 1; i < summarizers.size(); i++) {
-//            compoundFuzzySet = compoundFuzzySet.intersection(summarizers.get(i).fuzzySet);
-//        }
-//
-//        this.compoundSummarizer = new Label("compound", compoundFuzzySet);
+        FuzzySet<Double> compoundFuzzySet = summarizers.getFirst().fuzzySet;
+        for (int i = 1; i < summarizers.size(); i++) {
+            compoundFuzzySet = compoundFuzzySet.intersection(summarizers.get(i).fuzzySet);
+        }
+
+        this.compoundSummarizer = new Label("compound", compoundFuzzySet);
     }
 
     public double degreeOfTruth() {
         double sigmaCount = compoundSummarizer.fuzzySet.getSigmaCount();
 
         double M = switch (quantifier.type()) {
-            case ABSOLUTE -> 1.0;
-            case RELATIVE -> compoundSummarizer.fuzzySet.getUniverse().getSamples().size();
+            case RELATIVE -> 1.0;
+            case ABSOLUTE -> compoundSummarizer.fuzzySet.getUniverse().getLength();
         };
 
-        return quantifier.fuzzySet().membership(sigmaCount / M);
+        double value = quantifier.fuzzySet().membership(sigmaCount / M);
+        logger.info("sigmacount: %s / M: %s".formatted(sigmaCount, M));
+        logger.info("value: %.2f".formatted(sigmaCount / M));
+        logger.info("T1: %.2f".formatted(value));
+        return value;
     }
 
     public double degreeOfImprecision() {
@@ -39,7 +46,7 @@ public class SingleSubjectSummary {
         double n = (double) 1 / summarizers.size();
 
         for (Label label : summarizers) {
-            value *= label.fuzzySet.getSigmaCount() / label.fuzzySet.getUniverse().getSamples().size();
+            value *= label.fuzzySet.getSigmaCount() / label.fuzzySet.getUniverse().getLength();
         }
 
         return 1 - Math.pow(value, n);
