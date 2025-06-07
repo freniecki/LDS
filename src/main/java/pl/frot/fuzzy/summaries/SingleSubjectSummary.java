@@ -31,6 +31,7 @@ public class SingleSubjectSummary {
         this.data = data;
         this.attributeExtractors = attributeExtractors;
     }
+
     public double degreeOfTruth() {
         if (data == null || attributeExtractors == null) {
             logger.warning("No data set for summary calculation!");
@@ -40,9 +41,8 @@ public class SingleSubjectSummary {
         return calculateDegreeOfTruth();
     }
 
-    // GŁÓWNA LOGIKA: Obliczanie prawdziwości
+    // ===== POPRAWIONE OBLICZANIE PRAWDZIWOŚCI =====
     private double calculateDegreeOfTruth() {
-
         logger.info("🔍 Processing summary with " + summarizers.size() + " summarizers: " +
                 summarizers.stream().map(s -> s.getName() + "(" + getAttributeNameFromLabel(s) + ")").toList());
 
@@ -50,77 +50,117 @@ public class SingleSubjectSummary {
             return 0.0;
         }
 
-        double sigmaCount = 0.0;
-        int validObjects = 0;
+        if (qualifier == null) {
+            // ===== FORMA PIERWSZA: Q P are/have S =====
+            return calculateFirstForm();
+        } else {
+            // ===== FORMA DRUGA: Q P being/having W are/have S =====
+            return calculateSecondForm();
+        }
+    }
 
-        // ✅ POPRAWNY ALGORYTM: Dla każdego obiektu z bazy danych
+    private double calculateFirstForm() {
+        // T(1. forma) = μQ(Σ-count(S₁) / M)
+        // gdzie M = |X| dla OBUDWU typów (różnica w interpretacji kwantyfikatora)
+
+        double sigmaCountS1 = 0.0;  // Σ-count(S₁) - suma przynależności do sumaryzatora
+
         for (Property property : data) {
-            // Sprawdź kwalifikator (jeśli istnieje)
-            boolean qualifierMatches = true;
-            // ✅ POPRAWNY KOD:
-            if (qualifier != null) {
-                // Pobierz nazwę atrybutu z qualifier, NIE z summarizers!
-                String qualifierAttributeName = getAttributeNameFromLabel(qualifier);
-                Function<Property, Double> qualifierExtractor = attributeExtractors.get(qualifierAttributeName);
-
-                if (qualifierExtractor != null) {
-                    Double qualifierValue = qualifierExtractor.apply(property);
-                    if (qualifierValue != null) {
-                        double qualifierMembership = qualifier.getFuzzySet().membership(qualifierValue);
-                        qualifierMatches = qualifierMembership > 0.0; // Próg można konfigurować
-                    }
-                }
-            }
-
-            if (qualifierMatches) {
-                validObjects++;
-
-                // Oblicz stopień przynależności do każdego summarizera
-                double combinedMembership = 1.0; // Start z 1.0 dla intersection (T-norma minimum)
-
-                for (Label summarizer : summarizers) {
-                    String attributeName = getAttributeNameFromLabel(summarizer);
-                    Function<Property, Double> extractor = attributeExtractors.get(attributeName);
-
-                    if (extractor != null) {
-                        Double attributeValue = extractor.apply(property);
-                        if (attributeValue != null) {
-                            double membership = summarizer.getFuzzySet().membership(attributeValue);
-                            // ✅ T-norma minimum dla "AND" (intersection)
-                            combinedMembership = Math.min(combinedMembership, membership);
-                        } else {
-                            combinedMembership = 0.0; // Null value = no membership
-                            break;
-                        }
-                    } else {
-                        logger.warning("No extractor found for attribute: " + attributeName);
-                        combinedMembership = 0.0;
-                        break;
-                    }
-                }
-
-                sigmaCount += combinedMembership;
-            }
+            double summarizerMembership = calculateSummarizerMembership(property);
+            sigmaCountS1 += summarizerMembership;
         }
 
-        // Oblicz wartość dla kwantyfikatora
-        if (validObjects == 0) {
-            return 0.0; // Unikamy dzielenia przez zero
-        }
+        double normalizedValue;
 
-        double normalizedValue = switch (quantifier.type()) {
-            case RELATIVE -> sigmaCount / validObjects;  // Proporcja ∈ [0,1]
-            case ABSOLUTE -> sigmaCount;                 // Surowa liczba
-        };
+        if (quantifier.type() == QuantifierType.RELATIVE) {
+            // Dla RELATIVE: proporcja ∈ [0,1]
+            normalizedValue = sigmaCountS1 / data.size();
+        } else {
+            // Dla ABSOLUTE: surowa liczba
+            normalizedValue = sigmaCountS1;
+        }
 
         double result = quantifier.fuzzySet().membership(normalizedValue);
 
-        logger.info("Summary: " + this.toString());
-        logger.info("sigmaCount: %.2f / validObjects: %d".formatted(sigmaCount, validObjects));
+        logger.info("FORMA PIERWSZA - Summary: " + this.toString());
+        logger.info("Σ-count(S₁): %.2f / data.size(): %d".formatted(sigmaCountS1, data.size()));
         logger.info("normalizedValue: %.2f".formatted(normalizedValue));
         logger.info("T1: %.2f".formatted(result));
 
         return result;
+    }
+
+    private double calculateSecondForm() {
+        // T(2. forma) = μQ(Σ-count(S₁ ∩ S₂) / Σ-count(S₂))
+        // gdzie S₁ = sumaryzator, S₂ = kwalifikator
+        // POPRAWNY WZÓR: stosunek obiektów spełniających ZARÓWNO S i W do obiektów spełniających W
+
+        double sigmaCountS2 = 0.0;           // Σ-count(S₂) - suma przynależności do kwalifikatora
+        double sigmaCountS1andS2 = 0.0;     // Σ-count(S₁ ∩ S₂) - suma przynależności do przecięcia
+
+        for (Property property : data) {
+            double summarizerMembership = calculateSummarizerMembership(property);  // μS₁(x)
+            double qualifierMembership = calculateQualifierMembership(property);    // μS₂(x)
+
+            sigmaCountS2 += qualifierMembership;
+
+            // T-norma (minimum) dla przecięcia S₁ ∩ S₂
+            double intersectionMembership = Math.min(summarizerMembership, qualifierMembership);
+            sigmaCountS1andS2 += intersectionMembership;
+        }
+
+        if (sigmaCountS2 == 0.0) {
+            return 0.0; // Unikamy dzielenia przez zero
+        }
+
+        double normalizedValue = sigmaCountS1andS2 / sigmaCountS2; // ZAWSZE ∈ [0,1] ✅
+        double result = quantifier.fuzzySet().membership(normalizedValue);
+
+        logger.info("FORMA DRUGA - Summary: " + this.toString());
+        logger.info("Σ-count(S₁ ∩ S₂): %.2f / Σ-count(S₂): %.2f".formatted(sigmaCountS1andS2, sigmaCountS2));
+        logger.info("normalizedValue: %.2f".formatted(normalizedValue));
+        logger.info("T1: %.2f".formatted(result));
+
+        return result;
+    }
+
+    // ===== METODY POMOCNICZE DLA T1 =====
+
+    private double calculateSummarizerMembership(Property property) {
+        double membership = 1.0; // T-norma (AND)
+
+        for (Label summarizer : summarizers) {
+            String attributeName = getAttributeNameFromLabel(summarizer);
+            Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+            if (extractor != null) {
+                Double value = extractor.apply(property);
+                if (value != null) {
+                    membership = Math.min(membership, summarizer.getFuzzySet().membership(value));
+                } else {
+                    return 0.0; // Null value = no membership
+                }
+            } else {
+                logger.warning("No extractor found for attribute: " + attributeName);
+                return 0.0;
+            }
+        }
+
+        return membership;
+    }
+
+    private double calculateQualifierMembership(Property property) {
+        if (qualifier == null) return 1.0;
+
+        String attributeName = getAttributeNameFromLabel(qualifier);
+        Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+        if (extractor != null) {
+            Double value = extractor.apply(property);
+            if (value != null) {
+                return qualifier.getFuzzySet().membership(value);
+            }
+        }
+
+        return 0.0;
     }
 
     private String getAttributeNameFromLabel(Label label) {
