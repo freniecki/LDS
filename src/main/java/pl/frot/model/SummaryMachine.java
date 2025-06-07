@@ -75,7 +75,6 @@ public class SummaryMachine {
         for (TermDao termDao : linguisticVariablesDao) {
             String name = termDao.name();
             List<Double> uod = termDao.uod();
-            uod.add(1.0); // add step for continuous
             Map<String, List<Double>> ranges = termDao.ranges();
 
             List<Label> labels = new ArrayList<>();
@@ -98,7 +97,6 @@ public class SummaryMachine {
             };
 
             List<Double> uod = quantifierDao.uod();
-            uod.add(1.0); // add step for continuous
             Map<String, List<Double>> quantifiersLabels = quantifierDao.ranges();
 
             for (Map.Entry<String, List<Double>> entry : quantifiersLabels.entrySet()) {
@@ -125,10 +123,10 @@ public class SummaryMachine {
 
     // ==== SUMMARIZING ====
 
-    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<Label> chosenLabels) {
+    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
 
-        List<List<Label>> labelCombinations = createLabelsCombinations(chosenLabels);
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
 
         for (Quantifier quantifier : chosenQuantifiers) {
             for (List<Label> labelCombination : labelCombinations) {
@@ -140,9 +138,5 @@ public class SummaryMachine {
             }
         }
         return summaries;
-    }
-
-    private List<List<Label>> createLabelsCombinations(List<Label> chosenLabels) {
-        return SetOperations.getCombinations(chosenLabels, 4);
     }
 }
