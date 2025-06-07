@@ -40,4 +40,9 @@ public class ContinousUniverse implements Universe<Double> {
         }
         return samples;
     }
+
+    @Override
+    public double getLength() {
+        return end - start;
+    }
 }

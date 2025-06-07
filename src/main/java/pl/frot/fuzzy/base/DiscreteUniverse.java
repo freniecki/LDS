@@ -9,10 +9,6 @@ public class DiscreteUniverse implements Universe<Double> {
         this.universe = universe;
     }
 
-    public DiscreteUniverse(double start, double end, double step) {
-        this.universe = new ContinousUniverse(start, end, step).getSamples();
-    }
-
     @Override
     public DomainType getDomainType() {
         return DomainType.DISCRETE;
@@ -26,5 +22,10 @@ public class DiscreteUniverse implements Universe<Double> {
     @Override
     public Set<Double> getSamples() {
         return universe;
+    }
+
+    @Override
+    public double getLength() {
+        return universe.size();
     }
 }

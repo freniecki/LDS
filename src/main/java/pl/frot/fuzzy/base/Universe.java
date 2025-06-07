@@ -9,4 +9,6 @@ public interface Universe<T> {
     boolean contains(T element);
 
     Set<T> getSamples();
+
+    double getLength();
 }
