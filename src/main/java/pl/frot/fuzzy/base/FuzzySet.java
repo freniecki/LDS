@@ -52,6 +52,22 @@ public class FuzzySet<T> {
                 .max()
                 .orElse(0.0);
     }
+    public T findArgumentOfMaximum() {
+        Set<T> samples = domain.getSamples();
+
+        double maxMembership = 0.0;
+        T argMax = null;
+
+        for (T sample : samples) {
+            double membership = membership(sample);
+            if (membership > maxMembership) {
+                maxMembership = membership;
+                argMax = sample;
+            }
+        }
+
+        return argMax;
+    }
 
     public boolean isNormal() {
         return getHeight() == 1.0;

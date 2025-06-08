@@ -159,7 +159,6 @@ public class SingleSubjectSummary {
                 return qualifier.getFuzzySet().membership(value);
             }
         }
-
         return 0.0;
     }
 
@@ -170,13 +169,78 @@ public class SingleSubjectSummary {
     // ===== MIARY JAKOŚCI - POZOSTAWIONE NA PRZYSZŁOŚĆ =====
 
     public double degreeOfImprecision() {
-        // TODO: Implementacja T2
-        return 0.0;
+        // T2 = 1 - ∛(∏μSᵢ(xₘₐₓᵢ))
+
+        if (summarizers.isEmpty()) {
+            return 0.0;
+        }
+
+        double product = 1.0;
+
+        logger.info("🔍 T2 CALCULATION START for: " + this.toString());
+
+        for (Label summarizer : summarizers) {
+            Double xMax = summarizer.getFuzzySet().findArgumentOfMaximum();
+
+            if (xMax == null) {
+                logger.warning("❌ No maximum found for summarizer: " + summarizer.getName());
+                continue;
+            }
+
+            double membershipAtMax = summarizer.getFuzzySet().membership(xMax);
+            product *= membershipAtMax;
+
+            logger.info("📊 Summarizer: %s | xMax: %.2f | μ(xMax): %.4f"
+                    .formatted(summarizer.getName(), xMax, membershipAtMax));
+        }
+
+        double nthRoot = Math.pow(product, 1.0 / summarizers.size());
+        double result = 1.0 - nthRoot;
+
+        logger.info("🎯 T2 Final: Product=%.4f, NthRoot=%.4f, T2=%.4f"
+                .formatted(product, nthRoot, result));
+
+        return result;
     }
 
     public double degreeOfCovering() {
-        // TODO: Implementacja T3
-        return 0.0;
+        if (data == null || data.isEmpty()) {
+            return 0.0;
+        }
+
+        if (qualifier == null) {
+            // ===== FORMA 1: T3 = |supp(S)| / m =====
+            int supportCount = 0;
+
+            for (Property property : data) {
+                double summarizerMembership = calculateSummarizerMembership(property);
+                if (summarizerMembership > 0.0) {
+                    supportCount++;
+                }
+            }
+
+            return (double) supportCount / data.size();
+
+        } else {
+            // ===== FORMA 2: T3 = |supp(S ∩ W)| / |supp(W)| =====
+            int supportW = 0;      // |supp(W)|
+            int supportSAndW = 0;  // |supp(S ∩ W)|
+
+            for (Property property : data) {
+                double summarizerMembership = calculateSummarizerMembership(property);
+                double qualifierMembership = calculateQualifierMembership(property);
+
+                if (qualifierMembership > 0.0) {
+                    supportW++;
+
+                    if (summarizerMembership > 0.0) {
+                        supportSAndW++;
+                    }
+                }
+            }
+
+            return supportW == 0 ? 0.0 : (double) supportSAndW / supportW;
+        }
     }
 
     public double degreeOfAppropriateness() {

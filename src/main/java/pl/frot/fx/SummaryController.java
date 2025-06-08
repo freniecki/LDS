@@ -35,50 +35,52 @@ public class SummaryController {
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
 
-        // ✅ NOWA KOLUMNA dla kwalifikatora
+        // Kolumna dla kwalifikatora
         TableColumn<SummaryDto, String> qualifierCol = new TableColumn<>("Kwalifikator");
         qualifierCol.setCellValueFactory(cellData -> {
-            // Wyciągnij kwalifikator z SummaryDto (trzeba dodać do SummaryDto)
             String qualifier = cellData.getValue().qualifier();
             return new SimpleStringProperty(qualifier != null ? qualifier : "brak");
         });
 
         // Kolumna dla T1
-        TableColumn<SummaryDto, Double> valueCol = new TableColumn<>("T1");
-        valueCol.setCellValueFactory(cellData ->
+        TableColumn<SummaryDto, Double> t1Col = new TableColumn<>("T1");
+        t1Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfTruth()).asObject());
 
+        TableColumn<SummaryDto, Double> t2Col = new TableColumn<>("T2");
+        t2Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfImprecision()).asObject());
+
+        TableColumn<SummaryDto, Double> t3Col = new TableColumn<>("T3");
+        t3Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfCovering()).asObject());
+
         // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, valueCol); // ← DODAJ qualifierCol
+        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, t1Col, t2Col, t3Col);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
     }
-
-    // ZMIEŃ createSingleSubjectSummaries() - dodaj sortowanie:
     public void createSingleSubjectSummaries() {
         List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
         List<Label> qualifiers = mainController.getParametersController().getToggledQualifiers();
         List<Quantifier> quantifiers = mainController.getParametersController().getToggledQuantifiers();
 
-        logger.fine("Labels: " + labels);
-        logger.fine("Qualifiers: " + qualifiers);
-        logger.fine("Quantifiers: " + quantifiers);
-
         List<SingleSubjectSummary> summaries = summaryMachine.createSingleSubjectSummaries(
                 quantifiers, qualifiers, labels);
 
-        logger.fine("Summaries: " + summaries);
-
+        // ZMIENIONE: Dodaj T2 i T3
         List<SummaryDto> summaryDtos = summaries.stream()
                 .map(s -> new SummaryDto(
                         s.toString(),
-                        s.degreeOfTruth(),
-                        s.getQualifier() != null ? s.getQualifier().getName() : null)) // ← DODAJ kwalifikator
-                .sorted((s1, s2) -> Double.compare(s2.degreeOfTruth(), s1.degreeOfTruth())) // ← SORTOWANIE
+                        s.degreeOfTruth(),           // T1
+                        s.degreeOfImprecision(),     // T2
+                        s.degreeOfCovering(),        // T3
+                        s.getQualifier() != null ? s.getQualifier().getName() : null))
                 .toList();
 
         addSummariesToTable(summaryDtos);
     }
+
 }
