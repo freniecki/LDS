@@ -1,6 +1,6 @@
 package pl.frot.fuzzy.base;
 
-import java.util.Set;
+import java.util.List;
 
 public interface Universe<T> {
 
@@ -8,7 +8,7 @@ public interface Universe<T> {
 
     boolean contains(T element);
 
-    Set<T> getSamples();
+    List<T> getSamples();
 
     double getLength();
 }
