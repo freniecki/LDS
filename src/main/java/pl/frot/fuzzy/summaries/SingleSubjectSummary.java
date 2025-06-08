@@ -88,7 +88,7 @@ public class SingleSubjectSummary {
         double membership = 1.0; // T-norma (AND)
 
         for (Label summarizer : summarizers) {
-            String attributeName = summarizer.attributeName;
+            String attributeName = summarizer.getAttributeName();
             Function<Property, Double> extractor = attributeExtractors.get(attributeName);
             if (extractor == null) {
                 logger.warning("No extractor found for attribute: " + attributeName);
@@ -109,7 +109,7 @@ public class SingleSubjectSummary {
     private double calculateQualifierMembership(Property property) {
         if (qualifier == null) return 1.0;
 
-        String attributeName = qualifier.attributeName;
+        String attributeName = qualifier.getAttributeName();
         Function<Property, Double> extractor = attributeExtractors.get(attributeName);
         if (extractor != null) {
             Double value = extractor.apply(property);
@@ -145,8 +145,9 @@ public class SingleSubjectSummary {
         logger.info("T2: " + String.format("%.3f", result) + " (summarizers: " + summarizers.size() + ")");
         return result;
     }
+
     public double degreeOfCovering() {
-        if (data == null || data.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             logger.warning("T3: No data available");
             return 0.0;
         }
@@ -154,13 +155,13 @@ public class SingleSubjectSummary {
         if (qualifier == null) {
             // FORMA 1
             int supportCount = 0;
-            for (Property property : data) {
+            for (Property property : properties) {
                 if (calculateSummarizerMembership(property) > 0.0) {
                     supportCount++;
                 }
             }
-            double result = (double) supportCount / data.size();
-            logger.info("T3 (Form 1): " + supportCount + "/" + data.size() + " = " + String.format("%.3f", result));
+            double result = (double) supportCount / properties.size();
+            logger.info("T3 (Form 1): " + supportCount + "/" + properties.size() + " = " + String.format("%.3f", result));
             return result;
 
         } else {
@@ -168,7 +169,7 @@ public class SingleSubjectSummary {
             int supportW = 0;
             int supportSAndW = 0;
 
-            for (Property property : data) {
+            for (Property property : properties) {
                 double qualifierMembership = calculateQualifierMembership(property);
                 if (qualifierMembership > 0.0) {
                     supportW++;
@@ -190,7 +191,7 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfAppropriateness() {
-        if (data == null || data.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             logger.warning("T4: No data available");
             return 0.0;
         }
@@ -199,7 +200,7 @@ public class SingleSubjectSummary {
         double product = 1.0;
 
         for (Label summarizer : summarizers) {
-            String attributeName = getAttributeNameFromLabel(summarizer);
+            String attributeName = summarizer.getAttributeName();
             Function<Property, Double> extractor = attributeExtractors.get(attributeName);
 
             if (extractor == null) {
@@ -208,14 +209,14 @@ public class SingleSubjectSummary {
             }
 
             int countSatisfying = 0;
-            for (Property property : data) {
+            for (Property property : properties) {
                 Double value = extractor.apply(property);
                 if (value != null && summarizer.getFuzzySet().membership(value) > 0.0) {
                     countSatisfying++;
                 }
             }
 
-            double rj = (double) countSatisfying / data.size();
+            double rj = (double) countSatisfying / properties.size();
             product *= rj;
         }
 
@@ -260,10 +261,10 @@ public class SingleSubjectSummary {
     }
 
     private double[] extractAttributeValues(Label summarizer) {
-        String attributeName = getAttributeNameFromLabel(summarizer);
+        String attributeName = summarizer.getAttributeName();
         Function<Property, Double> extractor = attributeExtractors.get(attributeName);
 
-        return data.stream()
+        return properties.stream()
                 .mapToDouble(property -> {
                     Double value = extractor.apply(property);
                     return value != null ? value : 0.0;

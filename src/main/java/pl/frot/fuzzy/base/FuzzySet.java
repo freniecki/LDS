@@ -24,10 +24,10 @@ public class FuzzySet<T> {
         return domain;
     }
 
-    public Set<T> getSupport() {
+    public List<T> getSupport() {
         return domain.getSamples().stream()
                 .filter(x -> membership(x) > 0.0)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     public Set<T> getAlphaCut(double alpha) {
@@ -46,8 +46,8 @@ public class FuzzySet<T> {
                 .sum();
     }
     public double getDegreeOfFuzziness() {
-        Set<T> support = getSupport();
-        Set<T> universe = domain.getSamples();
+        List<T> support = getSupport();
+        List<T> universe = domain.getSamples();
 
         if (universe.isEmpty()) {
             logger.warning("Empty universe for degree of fuzziness calculation");
@@ -80,7 +80,7 @@ public class FuzzySet<T> {
                 .orElse(0.0);
     }
     public T findArgumentOfMaximum() {
-        Set<T> samples = domain.getSamples();
+        List<T> samples = domain.getSamples();
 
         double maxMembership = 0.0;
         T argMax = null;

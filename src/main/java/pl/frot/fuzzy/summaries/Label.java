@@ -7,9 +7,10 @@ import pl.frot.fuzzy.base.FuzzySet;
 @Getter
 @AllArgsConstructor
 public class Label {
-    String name;
-    FuzzySet<Double> fuzzySet;
-    String attributeName;
+    private String name;
+    private FuzzySet<Double> fuzzySet;
+    private String attributeName;
+
     public Label(String name, FuzzySet<Double> fuzzySet) {
         this.name = name;
         this.fuzzySet = fuzzySet;

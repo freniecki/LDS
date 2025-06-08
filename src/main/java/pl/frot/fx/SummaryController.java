@@ -34,34 +34,33 @@ public class SummaryController {
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
 
-        // Kolumna dla T1
         TableColumn<SummaryDto, Double> t1Col = new TableColumn<>("T1");
         t1Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfTruth()).asObject());
-        TableColumn<SummaryDto, Double> valueCol = new TableColumn<>("T1");
-        valueCol.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty((cellData.getValue().degreeOfTruth())).asObject());
-        valueCol.setCellFactory(SummaryController.getDoubleCellFactory(2));
+        t1Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         TableColumn<SummaryDto, Double> t2Col = new TableColumn<>("T2");
         t2Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfImprecision()).asObject());
+        t2Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         TableColumn<SummaryDto, Double> t3Col = new TableColumn<>("T3");
         t3Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfCovering()).asObject());
+        t3Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         TableColumn<SummaryDto, Double> t4Col = new TableColumn<>("T4");
         t4Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfAppropriateness()).asObject());
+        t4Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         TableColumn<SummaryDto, Double> t5Col = new TableColumn<>("T5");
         t5Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().summaryLength()).asObject());
-
+        t5Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, t1Col, t2Col, t3Col, t4Col, t5Col);
+        summaryTable.getColumns().addAll(summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
@@ -72,7 +71,7 @@ public class SummaryController {
         List<Label> qualifiers = mainController.getParametersController().getToggledQualifiers();
         List<Quantifier> quantifiers = mainController.getParametersController().getToggledQuantifiers();
 
-        List<SingleSubjectSummary> summaries = summaryMachine.createSingleSubjectSummaries(
+        List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
                 quantifiers, qualifiers, labels);
 
         List<SummaryDto> summaryDtos = summaries.stream()
