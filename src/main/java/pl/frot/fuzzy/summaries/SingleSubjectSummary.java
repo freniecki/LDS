@@ -231,28 +231,102 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfQuantifierImprecision() {
-        // TODO: Implementacja T6
-        return 0.0;
+        // T6 = 1 - |supp(Q)| / |XQ|
+        int supportSize = quantifier.fuzzySet().getSupport().size();
+        int universeSize = quantifier.fuzzySet().getUniverse().getSamples().size();
+
+        if (universeSize == 0) {
+            logger.warning("T6: Empty universe");
+            return 0.0;
+        }
+
+        double result = 1.0 - ((double) supportSize / universeSize);
+        logger.info("T6: " + String.format("%.3f", result) +
+                " (support: " + supportSize + "/" + universeSize + ")");
+        return result;
     }
 
     public double degreeOfQuantifierCardinality() {
-        // TODO: Implementacja T7
-        return 0.0;
+        // T7 = 1 - |Q| / |XQ|
+        double sigmaCount = quantifier.fuzzySet().getSigmaCount();
+        int universeSize = quantifier.fuzzySet().getUniverse().getSamples().size();
+
+        if (universeSize == 0) {
+            logger.warning("T7: Empty universe");
+            return 0.0;
+        }
+
+        double result = 1.0 - (sigmaCount / universeSize);
+        logger.info("T7: " + String.format("%.3f", result) +
+                " (sigma: " + String.format("%.3f", sigmaCount) + "/" + universeSize + ")");
+        return result;
     }
 
     public double degreeOfSummarizerCardinality() {
-        // TODO: Implementacja T8
-        return 0.0;
+        // T8 = 1 - (∏(j=1 to n) |Sj|/|Xj|)^(1/n)
+        if (summarizers.isEmpty()) {
+            logger.warning("T8: No summarizers available");
+            return 0.0;
+        }
+
+        double product = 1.0;
+        for (Label summarizer : summarizers) {
+            double sigmaCount = summarizer.getFuzzySet().getSigmaCount();
+            int universeSize = summarizer.getFuzzySet().getUniverse().getSamples().size();
+
+            if (universeSize == 0) {
+                logger.warning("T8: Empty universe for summarizer: " + summarizer.getName());
+                return 0.0;
+            }
+
+            double ratio = sigmaCount / universeSize;
+            product *= ratio;
+        }
+
+        double nthRoot = Math.pow(product, 1.0 / summarizers.size());
+        double result = 1.0 - nthRoot;
+
+        logger.info("T8: " + String.format("%.3f", result) + " (summarizers: " + summarizers.size() + ")");
+        return result;
     }
 
     public double degreeOfQualifierImprecision() {
-        // TODO: Implementacja T9
-        return 0.0;
+        // T9 = 1 - in(W)
+        if (qualifier == null) {
+            logger.info("T9: No qualifier (form 1) = 0.0");
+            return 0.0;
+        }
+
+        double degreeOfFuzziness = qualifier.getFuzzySet().getDegreeOfFuzziness();
+        double result = 1.0 - degreeOfFuzziness;
+
+        logger.info("T9: " + String.format("%.3f", result) +
+                " (qualifier: " + qualifier.getName() +
+                ", fuzziness: " + String.format("%.3f", degreeOfFuzziness) + ")");
+        return result;
     }
 
     public double degreeOfQualifierCardinality() {
-        // TODO: Implementacja T10
-        return 0.0;
+        // T10 = 1 - |W|/|Xg|
+        if (qualifier == null) {
+            logger.info("T10: No qualifier (form 1) = 0.0");
+            return 0.0;
+        }
+
+        double sigmaCount = qualifier.getFuzzySet().getSigmaCount();
+        int universeSize = qualifier.getFuzzySet().getUniverse().getSamples().size();
+
+        if (universeSize == 0) {
+            logger.warning("T10: Empty universe for qualifier");
+            return 0.0;
+        }
+
+        double result = 1.0 - (sigmaCount / universeSize);
+
+        logger.info("T10: " + String.format("%.3f", result) +
+                " (qualifier: " + qualifier.getName() +
+                ", sigma: " + String.format("%.3f", sigmaCount) + "/" + universeSize + ")");
+        return result;
     }
 
     public double qualifierLength() {
