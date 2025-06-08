@@ -10,8 +10,10 @@ import lombok.Setter;
 import pl.frot.model.SummaryMachine;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class MainController {
+    private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
     @Getter
     private ParametersController parametersController;
@@ -27,30 +29,21 @@ public class MainController {
 
     @FXML
     public void initialize() throws IOException {
-        // load views, put to containers, create Controllers for dependencies
         FXMLLoader parametersLoader = new FXMLLoader(getClass().getResource("parameters.fxml"));
-        VBox parametersVbox = parametersLoader.load();
-        parametersContainer.getChildren().add(parametersVbox);
+        parametersContainer.getChildren().add(parametersLoader.load());
         parametersController = parametersLoader.getController();
+        parametersController.setMainController(this);
+        parametersController.prepareView();
 
         FXMLLoader topLoader = new FXMLLoader(getClass().getResource("top.fxml"));
-        HBox topHbox = topLoader.load();
-        topContainer.getChildren().add(topHbox);
+        topContainer.getChildren().add(topLoader.load());
         topController = topLoader.getController();
+        topController.setMainController(this);
 
         FXMLLoader summaryLoader = new FXMLLoader(getClass().getResource("summaries.fxml"));
-        ScrollPane summaryVbox = summaryLoader.load();
-        summaryContainer.setContent(summaryVbox);
+        summaryContainer.setContent(summaryLoader.load());
         summaryController = summaryLoader.getController();
-
-        // add dependencies between controllers
-        parametersController.setMainController(this);
-        topController.setMainController(this);
         summaryController.setMainController(this);
-
-        // load model to controllers
-        parametersController.setSummaryMachine(summaryMachine);
-        summaryController.setSummaryMachine(summaryMachine);
     }
 
     public void createSingleSubjectSummaries() {

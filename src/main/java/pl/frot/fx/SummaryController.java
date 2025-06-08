@@ -3,8 +3,10 @@ package pl.frot.fx;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import lombok.Setter;
 import pl.frot.fuzzy.summaries.Label;
 import pl.frot.fuzzy.summaries.Quantifier;
@@ -17,9 +19,6 @@ import java.util.logging.Logger;
 
 public class SummaryController {
     private static final Logger logger = Logger.getLogger(SummaryController.class.getName());
-
-    @Setter
-    private SummaryMachine summaryMachine;
 
     @Setter
     private MainController mainController;
@@ -35,21 +34,14 @@ public class SummaryController {
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
 
-        // ✅ NOWA KOLUMNA dla kwalifikatora
-        TableColumn<SummaryDto, String> qualifierCol = new TableColumn<>("Kwalifikator");
-        qualifierCol.setCellValueFactory(cellData -> {
-            // Wyciągnij kwalifikator z SummaryDto (trzeba dodać do SummaryDto)
-            String qualifier = cellData.getValue().qualifier();
-            return new SimpleStringProperty(qualifier != null ? qualifier : "brak");
-        });
-
         // Kolumna dla T1
         TableColumn<SummaryDto, Double> valueCol = new TableColumn<>("T1");
         valueCol.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().degreeOfTruth()).asObject());
+                new SimpleDoubleProperty((cellData.getValue().degreeOfTruth())).asObject());
+        valueCol.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, valueCol); // ← DODAJ qualifierCol
+        summaryTable.getColumns().addAll(summaryTextCol, valueCol);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
@@ -66,7 +58,7 @@ public class SummaryController {
         logger.fine("Qualifiers: " + qualifiers);
         logger.fine("Quantifiers: " + quantifiers);
 
-        List<SingleSubjectSummary> summaries = summaryMachine.createSingleSubjectSummaries(
+        List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
                 quantifiers, qualifiers, labels);
 
         logger.fine("Summaries: " + summaries);
@@ -80,5 +72,22 @@ public class SummaryController {
                 .toList();
 
         addSummariesToTable(summaryDtos);
+    }
+
+    // ==== UTILS ====
+
+    public static <T> Callback<TableColumn<T, Double>, TableCell<T, Double>> getDoubleCellFactory(int decimalPlaces) {
+        return column -> new TableCell<T, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    String format = "%." + decimalPlaces + "f";
+                    setText(String.format(format, item));
+                }
+            }
+        };
     }
 }

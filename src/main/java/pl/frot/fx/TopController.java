@@ -4,9 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 public class TopController {
-    private MainController mainController;
-
-    // ==== VIEW FIELDS ====
 
     @FXML private Button createSingleSubjectSummariesButton;
 
@@ -16,7 +13,6 @@ public class TopController {
     }
 
     public void setMainController(MainController mainController) {
-        this.mainController = mainController;
         createSingleSubjectSummariesButton.setOnAction( e -> mainController.createSingleSubjectSummaries());
     }
 }
