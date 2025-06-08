@@ -30,18 +30,19 @@ public class ParametersController {
 
     public void setSummaryMachine(SummaryMachine summaryMachine) {
         linguisticVariableTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        qualifiersTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
+        qualifiersTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);  // ✅
         quantifiersTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         linguisticVariableTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());
+        qualifiersTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());  // ✅
         quantifiersTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());
 
         this.summaryMachine = summaryMachine;
         updateView();
     }
-
     private void updateView() {
         updateLabelTreeView();
+        updateQualifierTreeView();
         updateQuantifierTreeView();
     }
 
@@ -68,6 +69,20 @@ public class ParametersController {
             quantifierRoot.getChildren().add(quantifierTreeItem);
         }
         quantifiersTreeView.setRoot(quantifierRoot);
+    }
+
+    private void updateQualifierTreeView() {
+        CheckBoxTreeItem<Object> qualifierRoot = new CheckBoxTreeItem<>("Kwalifikatory");
+        qualifierRoot.setExpanded(true);
+        for (LinguisticVariable linguisticVariable : summaryMachine.getLinguisticVariables()) {
+            CheckBoxTreeItem<Object> linguisticVariableTreeItem = new CheckBoxTreeItem<>(linguisticVariable.name());
+            for (Label label : linguisticVariable.labels()) {
+                CheckBoxTreeItem<Object> labelTreeItem = new CheckBoxTreeItem<>(label);
+                linguisticVariableTreeItem.getChildren().add(labelTreeItem);
+            }
+            qualifierRoot.getChildren().add(linguisticVariableTreeItem);
+        }
+        qualifiersTreeView.setRoot(qualifierRoot);
     }
 
     public List<List<Label>> getToggledSummarizers() {
@@ -114,4 +129,20 @@ public class ParametersController {
         }
         return toggledQuantifiers;
     }
+    public List<Label> getToggledQualifiers() {
+        List<Label> toggledQualifiers = new ArrayList<>();
+        for (TreeItem<Object> linguisticVariableItem : qualifiersTreeView.getRoot().getChildren()) {
+            for (TreeItem<Object> item : linguisticVariableItem.getChildren()) {
+                CheckBoxTreeItem<Object> labelItem = (CheckBoxTreeItem<Object>) item;
+                if (labelItem.isSelected()) {
+                    Object value = labelItem.getValue();
+                    if (value instanceof Label label) {
+                        toggledQualifiers.add(label);
+                    }
+                }
+            }
+        }
+        return toggledQualifiers;
+    }
+
 }

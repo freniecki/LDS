@@ -107,7 +107,7 @@ public class SummaryMachine {
                 String labelValue = entry.getKey();
                 FuzzySet<Double> fuzzySet = getDoubleFuzzySet(entry.getValue(), uod);
 
-                // ✅ Użyj konstruktor z attributeName
+                //  Użyj konstruktor z attributeName
                 labels.add(new Label(labelValue, fuzzySet, attributeName));
             }
             linguisticVariables.add(new LinguisticVariable(attributeName, labels));
@@ -166,12 +166,59 @@ public class SummaryMachine {
                         labelCombination
                 );
 
-                // ✅ DODAJ TO - ustawienie danych na summary
+                // ustawienie danych na summary
                 summary.setData(properties, attributeExtractors);
 
                 summaries.add(summary);
             }
         }
+        return summaries;
+    }
+
+    // DODAJ nową metodę główną:
+    public List<SingleSubjectSummary> createSingleSubjectSummaries(
+            List<Quantifier> quantifiers,
+            List<Label> qualifiers,
+            List<List<Label>> summarizers) {
+
+        List<SingleSubjectSummary> allSummaries = new ArrayList<>();
+
+        // ZAWSZE generuj formę 1
+        allSummaries.addAll(createFirstTypeSingleSubjectSummaries(quantifiers, summarizers));
+
+        // Forma 2 TYLKO jeśli wybrano kwalifikatory
+        if (!qualifiers.isEmpty()) {
+            allSummaries.addAll(createSecondTypeSingleSubjectSummaries(quantifiers, qualifiers, summarizers));
+        }
+
+        return allSummaries;
+    }
+
+    // DODAJ nową metodę dla formy 2 z kwalifikatorami:
+    public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(
+            List<Quantifier> chosenQuantifiers,
+            List<Label> chosenQualifiers,        // ← NOWY parametr
+            List<List<Label>> chosenLabels) {
+
+        List<SingleSubjectSummary> summaries = new ArrayList<>();
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
+
+        for (Quantifier quantifier : chosenQuantifiers) {
+            for (Label qualifier : chosenQualifiers) {           // ← Iteruj po wybranych kwalifikatorach
+                for (List<Label> summarizers : labelCombinations) { // ← Wszystkie jako sumaryzatory
+
+                    SingleSubjectSummary summary = new SingleSubjectSummary(
+                            quantifier,
+                            qualifier,      // ← Wybrany kwalifikator
+                            summarizers     // ← Wszystkie jako sumaryzatory
+                    );
+
+                    summary.setData(properties, attributeExtractors);
+                    summaries.add(summary);
+                }
+            }
+        }
+
         return summaries;
     }
 }

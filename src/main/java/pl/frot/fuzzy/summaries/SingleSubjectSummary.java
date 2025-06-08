@@ -125,7 +125,7 @@ public class SingleSubjectSummary {
     }
 
     // ===== METODY POMOCNICZE DLA T1 =====
-
+    // oblicza przeciecie wszytkich sumaryzatorow
     private double calculateSummarizerMembership(Property property) {
         double membership = 1.0; // T-norma (AND)
 
