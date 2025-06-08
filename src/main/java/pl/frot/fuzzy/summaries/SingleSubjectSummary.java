@@ -3,6 +3,7 @@ package pl.frot.fuzzy.summaries;
 import lombok.Getter;
 import pl.frot.data.Property;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -217,8 +218,7 @@ public class SingleSubjectSummary {
             product *= rj;
         }
 
-        double result = Math.abs(product - t3);
-        return result;
+        return Math.abs(product - t3);
     }
 
     public double summaryLength() {
@@ -236,10 +236,7 @@ public class SingleSubjectSummary {
             return 0.0;
         }
 
-        double result = 1.0 - ((double) supportSize / universeSize);
-        logger.info("T6: " + String.format("%.3f", result) +
-                " (support: " + supportSize + "/" + universeSize + ")");
-        return result;
+        return 1.0 - ((double) supportSize / universeSize);
     }
 
     public double degreeOfQuantifierCardinality() {
@@ -252,10 +249,7 @@ public class SingleSubjectSummary {
             return 0.0;
         }
 
-        double result = 1.0 - (sigmaCount / universeSize);
-        logger.info("T7: " + String.format("%.3f", result) +
-                " (sigma: " + String.format("%.3f", sigmaCount) + "/" + universeSize + ")");
-        return result;
+        return  1.0 - (sigmaCount / universeSize);
     }
 
     public double degreeOfSummarizerCardinality() {
@@ -280,10 +274,7 @@ public class SingleSubjectSummary {
         }
 
         double nthRoot = Math.pow(product, 1.0 / summarizers.size());
-        double result = 1.0 - nthRoot;
-
-        logger.info("T8: " + String.format("%.3f", result) + " (summarizers: " + summarizers.size() + ")");
-        return result;
+        return 1.0 - nthRoot;
     }
 
     public double degreeOfQualifierImprecision() {
@@ -294,12 +285,7 @@ public class SingleSubjectSummary {
         }
 
         double degreeOfFuzziness = qualifier.getFuzzySet().getDegreeOfFuzziness();
-        double result = 1.0 - degreeOfFuzziness;
-
-        logger.info("T9: " + String.format("%.3f", result) +
-                " (qualifier: " + qualifier.getName() +
-                ", fuzziness: " + String.format("%.3f", degreeOfFuzziness) + ")");
-        return result;
+        return  1.0 - degreeOfFuzziness;
     }
 
     public double degreeOfQualifierCardinality() {
@@ -317,17 +303,35 @@ public class SingleSubjectSummary {
             return 0.0;
         }
 
-        double result = 1.0 - (sigmaCount / universeSize);
-
-        logger.info("T10: " + String.format("%.3f", result) +
-                " (qualifier: " + qualifier.getName() +
-                ", sigma: " + String.format("%.3f", sigmaCount) + "/" + universeSize + ")");
-        return result;
+        return  1.0 - (sigmaCount / universeSize);
     }
 
     public double qualifierLength() {
-        // TODO: Implementacja T11
-        return 0.0;
+        if (qualifier == null) {
+            return 0.0;
+        }
+        return 2 * 0.5;
+    }
+
+    public double optimalMeasure() {
+        List<Double> attributesWages = new ArrayList<>(List.of(0.7));
+        for (int i = 0; i < 10; i++) {
+            attributesWages.add(0.03);
+        }
+
+        double sum = degreeOfTruth() * attributesWages.getFirst()
+                + degreeOfQuantifierCardinality() * attributesWages.get(1)
+                + degreeOfSummarizerCardinality() * attributesWages.get(2)
+                + degreeOfQualifierImprecision() * attributesWages.get(3)
+                + degreeOfQualifierCardinality() * attributesWages.get(4)
+                + degreeOfTruth() * attributesWages.get(5)
+                + degreeOfQuantifierCardinality() * attributesWages.get(6)
+                + degreeOfSummarizerCardinality() * attributesWages.get(7)
+                + degreeOfQualifierImprecision() * attributesWages.get(8)
+                + degreeOfQualifierCardinality() * attributesWages.get(9)
+                + qualifierLength() * attributesWages.get(10);
+
+        return sum / 11;
     }
 
     private double[] extractAttributeValues(Label summarizer) {

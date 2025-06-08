@@ -15,14 +15,16 @@ public record SummaryDto(
         double degreeOfQuantifierCardinality,    // T7
         double degreeOfSummarizerCardinality,    // T8
         double degreeOfQualifierImprecision,     // T9
-        double degreeOfQualifierCardinality,     // T10
+        double degreeOfQualifierCardinality,
+        double qualifierLength,
+        double optimal,// T10
         String qualifier,
         BooleanProperty selected
 ) {
     public SummaryDto(String summary, double degreeOfTruth, String qualifier) {
         this(summary, degreeOfTruth, 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0,
-                0.0, qualifier, new SimpleBooleanProperty(false));
+                0.0, 0.0,0.0, qualifier, new SimpleBooleanProperty(false));
     }
 
     public boolean isSelected() {

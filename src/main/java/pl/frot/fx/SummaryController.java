@@ -90,14 +90,25 @@ public class SummaryController {
                 new SimpleDoubleProperty(cellData.getValue().degreeOfQualifierCardinality()).asObject());
         t10Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
+        TableColumn<SummaryDto, Double> t11Col = new TableColumn<>("T11");
+        t11Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().qualifierLength()).asObject());
+        t11Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
+        TableColumn<SummaryDto, Double> tOptCol = new TableColumn<>("T*");
+        tOptCol.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().optimal()).asObject());
+        tOptCol.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
         summaryTable.getColumns().addAll(selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
-                t6Col, t7Col, t8Col, t9Col, t10Col);
+                t6Col, t7Col, t8Col, t9Col, t10Col, t11Col, tOptCol);
         summaryTable.setEditable(true);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
     }
+
     public void createSingleSubjectSummaries() {
         List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
         List<Label> qualifiers = mainController.getParametersController().getToggledQualifiers();
@@ -119,6 +130,8 @@ public class SummaryController {
                         s.degreeOfSummarizerCardinality(),      // T8
                         s.degreeOfQualifierImprecision(),       // T9
                         s.degreeOfQualifierCardinality(),       // T10
+                        s.qualifierLength(),                    // T11
+                        s.optimalMeasure(),                            // T*
                         s.getQualifier() != null ? s.getQualifier().getName() : null,
                                 new SimpleBooleanProperty(false))
                         )
