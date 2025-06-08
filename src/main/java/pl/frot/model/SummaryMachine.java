@@ -1,6 +1,7 @@
 package pl.frot.model;
 
 import lombok.Getter;
+import pl.frot.data.DataWriter;
 import pl.frot.data.Property;
 import pl.frot.data.TermDao;
 import pl.frot.data.DataLoader;
@@ -206,5 +207,11 @@ public class SummaryMachine {
         }
 
         return summaries;
+    }
+
+    // ==== UTILS ====
+
+    public void saveToFile(List<String> strings) {
+        DataWriter.saveToFile(strings);
     }
 }

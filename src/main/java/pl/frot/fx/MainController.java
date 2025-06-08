@@ -17,7 +17,9 @@ public class MainController {
 
     @Getter
     private ParametersController parametersController;
+    @Getter
     private TopController topController;
+    @Getter
     private SummaryController summaryController;
 
     @Getter @Setter

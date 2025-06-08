@@ -1,15 +1,34 @@
 package pl.frot.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 public record SummaryDto(
         String summary,
-        double degreeOfTruth,        // T1
-        double degreeOfImprecision,  // T2
+        double degreeOfTruth,
+        double degreeOfImprecision,
         double degreeOfCovering,
         double degreeOfAppropriateness,
         double summaryLength,
-        String qualifier
+        String qualifier,
+        BooleanProperty selected
 ) {
-    public SummaryDto(String summary, double degreeOfTruth, String qualifier) {
-        this(summary, degreeOfTruth, 0.0, 0.0,0.0, 0.0, qualifier);
+    public SummaryDto(String summary, double degreeOfTruth, double degreeOfImprecision,
+                      double degreeOfCovering, double degreeOfAppropriateness,
+                      double summaryLength, String qualifier) {
+        this(summary, degreeOfTruth, degreeOfImprecision, degreeOfCovering, degreeOfAppropriateness, summaryLength, qualifier, new SimpleBooleanProperty(false));
     }
+
+    public BooleanProperty selectedProperty() {
+        return selected;
+    }
+
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected.set(selected);
+    }
+
 }

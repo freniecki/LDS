@@ -1,11 +1,13 @@
 package pl.frot.fx;
 
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.util.Callback;
 import lombok.Setter;
 import pl.frot.fuzzy.summaries.Label;
@@ -29,7 +31,11 @@ public class SummaryController {
     private void addSummariesToTable(List<SummaryDto> summaryDtos) {
         summaryTable.getColumns().clear();
 
-        // Kolumna dla podsumowania
+        TableColumn<SummaryDto, Boolean> selectedCol = new TableColumn<>("Zapisz");
+        selectedCol.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
+        selectedCol.setCellFactory(CheckBoxTableCell.forTableColumn(selectedCol));
+        selectedCol.setEditable(true);
+
         TableColumn<SummaryDto, String> summaryTextCol = new TableColumn<>("Podsumowanie");
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
@@ -60,12 +66,14 @@ public class SummaryController {
         t5Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
         // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col);
+        summaryTable.getColumns().addAll(selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col);
+        summaryTable.setEditable(true);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
     }
+
     public void createSingleSubjectSummaries() {
         List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
         List<Label> qualifiers = mainController.getParametersController().getToggledQualifiers();
@@ -82,10 +90,17 @@ public class SummaryController {
                         s.degreeOfCovering(),
                         s.degreeOfAppropriateness(),
                         s.summaryLength(),
-                        s.getQualifier() != null ? s.getQualifier().getName() : null))
+                        (s.getQualifier() != null) ? s.getQualifier().getName() : null))
                 .toList();
 
         addSummariesToTable(summaryDtos);
+    }
+
+    public void saveSummaries() {
+        List<SummaryDto> selectedSummaries = summaryTable.getItems().stream().filter(SummaryDto::isSelected).toList();
+        List<String> summaries = selectedSummaries.stream().map(SummaryDto::summary).toList();
+
+        mainController.getSummaryMachine().saveToFile(summaries);
     }
 
     // ==== UTILS ====
