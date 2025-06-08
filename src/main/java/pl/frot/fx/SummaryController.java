@@ -59,9 +59,34 @@ public class SummaryController {
                 new SimpleDoubleProperty(cellData.getValue().summaryLength()).asObject());
         t5Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
-        // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col);
+        TableColumn<SummaryDto, Double> t6Col = new TableColumn<>("T6");
+        t6Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfQuantifierImprecision()).asObject());
+        t6Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
+        TableColumn<SummaryDto, Double> t7Col = new TableColumn<>("T7");
+        t7Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfQuantifierCardinality()).asObject());
+        t7Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
+        TableColumn<SummaryDto, Double> t8Col = new TableColumn<>("T8");
+        t8Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfSummarizerCardinality()).asObject());
+        t8Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
+        TableColumn<SummaryDto, Double> t9Col = new TableColumn<>("T9");
+        t9Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfQualifierImprecision()).asObject());
+        t9Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
+        TableColumn<SummaryDto, Double> t10Col = new TableColumn<>("T10");
+        t10Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfQualifierCardinality()).asObject());
+        t10Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
+
+        // Zmień addAll:
+        summaryTable.getColumns().addAll(summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
+                t6Col, t7Col, t8Col, t9Col, t10Col);
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
@@ -77,11 +102,16 @@ public class SummaryController {
         List<SummaryDto> summaryDtos = summaries.stream()
                 .map(s -> new SummaryDto(
                         s.toString(),
-                        s.degreeOfTruth(),
-                        s.degreeOfImprecision(),
-                        s.degreeOfCovering(),
-                        s.degreeOfAppropriateness(),
-                        s.summaryLength(),
+                        s.degreeOfTruth(),                      // T1
+                        s.degreeOfImprecision(),                // T2
+                        s.degreeOfCovering(),                   // T3
+                        s.degreeOfAppropriateness(),            // T4
+                        s.summaryLength(),                      // T5
+                        s.degreeOfQuantifierImprecision(),      // T6
+                        s.degreeOfQuantifierCardinality(),      // T7
+                        s.degreeOfSummarizerCardinality(),      // T8
+                        s.degreeOfQualifierImprecision(),       // T9
+                        s.degreeOfQualifierCardinality(),       // T10
                         s.getQualifier() != null ? s.getQualifier().getName() : null))
                 .toList();
 
