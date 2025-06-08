@@ -1,6 +1,8 @@
 package pl.frot.fuzzy.base;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class ContinousUniverse implements Universe<Double> {
@@ -33,8 +35,8 @@ public class ContinousUniverse implements Universe<Double> {
     }
 
     @Override
-    public Set<Double> getSamples() {
-        Set<Double> samples = new HashSet<>();
+    public List<Double> getSamples() {
+        List<Double> samples = new LinkedList<>();
         int numSamples = (int) Math.ceil((end - start) / step) + 1;
 
         for (int i = 0; i < numSamples; i++) {

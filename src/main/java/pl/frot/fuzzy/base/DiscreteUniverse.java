@@ -1,11 +1,12 @@
 package pl.frot.fuzzy.base;
 
+import java.util.List;
 import java.util.Set;
 
-public class DiscreteUniverse implements Universe<Double> {
-    private final Set<Double> universe;
+public class DiscreteUniverse<T> implements Universe<T> {
+    private final List<T> universe;
 
-    public DiscreteUniverse(Set<Double> universe) {
+    public DiscreteUniverse(List<T> universe) {
         this.universe = universe;
     }
 
@@ -15,12 +16,12 @@ public class DiscreteUniverse implements Universe<Double> {
     }
 
     @Override
-    public boolean contains(Double element) {
+    public boolean contains(T element) {
         return universe.contains(element);
     }
 
     @Override
-    public Set<Double> getSamples() {
+    public List<T> getSamples() {
         return universe;
     }
 
