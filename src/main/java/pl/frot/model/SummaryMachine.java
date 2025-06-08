@@ -10,31 +10,22 @@ import pl.frot.utils.SetOperations;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class SummaryMachine {
 
     private static final Logger logger = Logger.getLogger(SummaryMachine.class.getName());
-    private Map<String, Function<Property, Double>> attributeExtractors;
+    private final Map<String, Function<Property, Double>> attributeExtractors = new HashMap<>();
     List<Property> properties = new ArrayList<>();
     @Getter
     List<LinguisticVariable> linguisticVariables = new ArrayList<>();
     @Getter
     List<Quantifier> quantifiers = new ArrayList<>();
 
-    public static void main(String[] args) {
-        SummaryMachine sm = new SummaryMachine();
-        sm.run();
-    }
-
-
     private void initializeAttributeExtractors() {
-        attributeExtractors = new HashMap<>();
         attributeExtractors.put("soldPrice", Property::getSoldPrice);
         attributeExtractors.put("totalInteriorLivableArea", Property::getTotalInteriorLivableArea);
         attributeExtractors.put("lot", Property::getLot);
@@ -54,11 +45,11 @@ public class SummaryMachine {
     }
 
     public void run() {
+        initializeAttributeExtractors();
+
         if (!loadData()) {
             logger.warning("Failed to load data");
-            return;
         }
-        initializeAttributeExtractors();
     }
 
     // ==== DATA LOADING ====
@@ -96,26 +87,29 @@ public class SummaryMachine {
         return true;
     }
 
-    private void loadLinguisticVariables(List<TermDao> linguisticVariablesDao) {
-        for (TermDao termDao : linguisticVariablesDao) {
-            String attributeName = termDao.name(); // nazwa z JSON
-            List<Double> uod = termDao.uod();
-            Map<String, List<Double>> ranges = termDao.ranges();
+    private void loadLinguisticVariables(List<TermDao> linguisticVariablesDaoList) {
+        for (TermDao linguisticVariableDao : linguisticVariablesDaoList) {
+            String attributeName = linguisticVariableDao.name(); // nazwa z JSON
+            Map<String, List<Double>> ranges = linguisticVariableDao.ranges();
+            List<Double> uod = properties.stream()
+                    .map(p -> attributeExtractors.get(attributeName).apply(p))
+                    .toList();
 
             List<Label> labels = new ArrayList<>();
             for (Map.Entry<String, List<Double>> entry : ranges.entrySet()) {
                 String labelValue = entry.getKey();
-                FuzzySet<Double> fuzzySet = getDoubleFuzzySet(entry.getValue(), uod);
+                FuzzySet<Double> fuzzySet = new FuzzySet<>(
+                        new DiscreteUniverse<>(uod),
+                        getMembershipFunction(entry.getValue()));
 
-                //  Użyj konstruktor z attributeName
                 labels.add(new Label(labelValue, fuzzySet, attributeName));
             }
             linguisticVariables.add(new LinguisticVariable(attributeName, labels));
         }
     }
 
-    private void loadQuantifiers(List<TermDao> quantifiersDao) {
-        for (TermDao quantifierDao : quantifiersDao) {
+    private void loadQuantifiers(List<TermDao> quantifiersDaoList) {
+        for (TermDao quantifierDao : quantifiersDaoList) {
             QuantifierType type = switch (quantifierDao.name()) {
                 case "relative" -> QuantifierType.RELATIVE;
                 case "absolute" -> QuantifierType.ABSOLUTE;
@@ -127,32 +121,41 @@ public class SummaryMachine {
 
             for (Map.Entry<String, List<Double>> entry : quantifiersLabels.entrySet()) {
                 String labelValue = entry.getKey();
-                FuzzySet<Double> fuzzySet = getDoubleFuzzySet(entry.getValue(), uod);
+                FuzzySet<Double> fuzzySet = new FuzzySet<>(
+                        new ContinousUniverse(uod.get(0), uod.get(1), uod.get(2)),
+                        getMembershipFunction(entry.getValue())
+                );
 
                 quantifiers.add(new Quantifier(labelValue, type, fuzzySet));
             }
         }
     }
 
-    private FuzzySet<Double> getDoubleFuzzySet(List<Double> funcParams, List<Double> uod) {
-        MembershipFunction<Double> membershipFunction = switch (funcParams.size()) {
+    private MembershipFunction<Double> getMembershipFunction(List<Double> funcParams) {
+        return switch (funcParams.size()) {
             case 3 -> new TriangularFunction(funcParams);
             case 4 -> new TrapezoidalFunction(funcParams);
             default -> throw new IllegalStateException("Unexpected value: " + funcParams.size());
         };
-
-        return new FuzzySet<>(
-                new ContinousUniverse(uod.getFirst(), uod.get(1), uod.get(2)),
-                membershipFunction
-        );
     }
 
     // ==== SUMMARIZING ====
 
-    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
-        logger.info("🔍 attributeExtractors keys: " + (attributeExtractors != null ? attributeExtractors.keySet() : "NULL"));
-        logger.info("🎯 Input: " + chosenQuantifiers.size() + " quantifiers, " + chosenLabels.size() + " label groups");
+    public List<SingleSubjectSummary> createSingleSubjectSummaries(
+            List<Quantifier> quantifiers,
+            List<Label> qualifiers,
+            List<List<Label>> summarizers) {
 
+        List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, summarizers);
+
+        if (!qualifiers.isEmpty()) {
+            allSummaries.addAll(createSecondTypeSingleSubjectSummaries(quantifiers, qualifiers, summarizers));
+        }
+
+        return allSummaries;
+    }
+
+    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
 
@@ -163,11 +166,10 @@ public class SummaryMachine {
                 SingleSubjectSummary summary = new SingleSubjectSummary(
                         quantifier,
                         null,
-                        labelCombination
+                        labelCombination,
+                        properties,
+                        attributeExtractors
                 );
-
-                // ustawienie danych na summary
-                summary.setData(properties, attributeExtractors);
 
                 summaries.add(summary);
             }
@@ -175,29 +177,9 @@ public class SummaryMachine {
         return summaries;
     }
 
-    // DODAJ nową metodę główną:
-    public List<SingleSubjectSummary> createSingleSubjectSummaries(
-            List<Quantifier> quantifiers,
-            List<Label> qualifiers,
-            List<List<Label>> summarizers) {
-
-        List<SingleSubjectSummary> allSummaries = new ArrayList<>();
-
-        // ZAWSZE generuj formę 1
-        allSummaries.addAll(createFirstTypeSingleSubjectSummaries(quantifiers, summarizers));
-
-        // Forma 2 TYLKO jeśli wybrano kwalifikatory
-        if (!qualifiers.isEmpty()) {
-            allSummaries.addAll(createSecondTypeSingleSubjectSummaries(quantifiers, qualifiers, summarizers));
-        }
-
-        return allSummaries;
-    }
-
-    // DODAJ nową metodę dla formy 2 z kwalifikatorami:
     public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(
             List<Quantifier> chosenQuantifiers,
-            List<Label> chosenQualifiers,        // ← NOWY parametr
+            List<Label> chosenQualifiers,
             List<List<Label>> chosenLabels) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
@@ -206,14 +188,18 @@ public class SummaryMachine {
         for (Quantifier quantifier : chosenQuantifiers) {
             for (Label qualifier : chosenQualifiers) {           // ← Iteruj po wybranych kwalifikatorach
                 for (List<Label> summarizers : labelCombinations) { // ← Wszystkie jako sumaryzatory
+                    if (summarizers.contains(qualifier)) {
+                        continue;
+                    }
 
                     SingleSubjectSummary summary = new SingleSubjectSummary(
                             quantifier,
-                            qualifier,      // ← Wybrany kwalifikator
-                            summarizers     // ← Wszystkie jako sumaryzatory
+                            qualifier,
+                            summarizers,
+                            properties,
+                            attributeExtractors
                     );
 
-                    summary.setData(properties, attributeExtractors);
                     summaries.add(summary);
                 }
             }
