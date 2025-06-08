@@ -22,11 +22,5 @@ class FuzzySetTest {
                 new TriangularFunction(1.0, 5.0, 9.0));
 
         Quantifier quantifier = new Quantifier("Q1", QuantifierType.ABSOLUTE, fuzzySetQ1);
-
-        // create summary
-        SingleSubjectSummary summary = new SingleSubjectSummary(quantifier, null, List.of(labelS1));
-
-        System.out.println(summary);
-        System.out.println(summary.degreeOfTruth());
     }
 }
