@@ -2,6 +2,7 @@ package pl.frot.model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 
 public record SummaryDto(
         String summary,
@@ -15,10 +16,13 @@ public record SummaryDto(
         double degreeOfSummarizerCardinality,    // T8
         double degreeOfQualifierImprecision,     // T9
         double degreeOfQualifierCardinality,     // T10
-        String qualifier
+        String qualifier,
+        BooleanProperty selected
 ) {
     public SummaryDto(String summary, double degreeOfTruth, String qualifier) {
-        this(summary, degreeOfTruth, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, qualifier);
+        this(summary, degreeOfTruth, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0,
+                0.0, qualifier, new SimpleBooleanProperty(false));
     }
 
     public boolean isSelected() {
@@ -29,4 +33,7 @@ public record SummaryDto(
         this.selected.set(selected);
     }
 
+    public ObservableValue<Boolean> selectedProperty() {
+        return selected;
+    }
 }

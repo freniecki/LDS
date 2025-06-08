@@ -90,9 +90,10 @@ public class SummaryController {
                 new SimpleDoubleProperty(cellData.getValue().degreeOfQualifierCardinality()).asObject());
         t10Col.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
-        // Zmień addAll:
-        summaryTable.getColumns().addAll(summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
+        summaryTable.getColumns().addAll(selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
                 t6Col, t7Col, t8Col, t9Col, t10Col);
+        summaryTable.setEditable(true);
+
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
@@ -118,7 +119,9 @@ public class SummaryController {
                         s.degreeOfSummarizerCardinality(),      // T8
                         s.degreeOfQualifierImprecision(),       // T9
                         s.degreeOfQualifierCardinality(),       // T10
-                        s.getQualifier() != null ? s.getQualifier().getName() : null))
+                        s.getQualifier() != null ? s.getQualifier().getName() : null,
+                                new SimpleBooleanProperty(false))
+                        )
                 .toList();
 
         addSummariesToTable(summaryDtos);

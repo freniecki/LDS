@@ -142,7 +142,6 @@ public class SingleSubjectSummary {
         double nthRoot = Math.pow(product, 1.0 / summarizers.size());
         double result = 1.0 - nthRoot;
 
-        logger.info("T2: " + String.format("%.3f", result) + " (summarizers: " + summarizers.size() + ")");
         return result;
     }
 
@@ -161,7 +160,6 @@ public class SingleSubjectSummary {
                 }
             }
             double result = (double) supportCount / properties.size();
-            logger.info("T3 (Form 1): " + supportCount + "/" + properties.size() + " = " + String.format("%.3f", result));
             return result;
 
         } else {
@@ -185,7 +183,6 @@ public class SingleSubjectSummary {
             }
 
             double result = (double) supportSAndW / supportW;
-            logger.info("T3 (Form 2): " + supportSAndW + "/" + supportW + " = " + String.format("%.3f", result));
             return result;
         }
     }
@@ -221,7 +218,6 @@ public class SingleSubjectSummary {
         }
 
         double result = Math.abs(product - t3);
-        logger.info("T4: " + String.format("%.3f", result) + " (product: " + String.format("%.3f", product) + ", T3: " + String.format("%.3f", t3) + ")");
         return result;
     }
 

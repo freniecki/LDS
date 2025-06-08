@@ -6,8 +6,9 @@
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="pl.frot.fx.TopController"
-      prefHeight="150.0" prefWidth="1920.0">
+      prefHeight="150.0" prefWidth="1920.0" spacing="15.0">
 
     <Button fx:id="createSingleSubjectSummariesButton" />
+    <Button fx:id="saveSummariesButton" />
 
 </HBox>
