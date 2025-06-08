@@ -2,21 +2,22 @@
 
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.control.ScrollPane?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="pl.frot.fx.MainController"
             prefHeight="1080.0" prefWidth="1920.0">
 
     <top>
-        <fx:include fx:id="topContainer" source="top.fxml"/>
+        <HBox fx:id="topContainer"/>
     </top>
 
     <left>
-        <fx:include fx:id="parametersContainer" source="parameters.fxml"/>
+        <VBox fx:id="parametersContainer"/>
     </left>
 
     <center>
-        <fx:include fx:id="summaryContainer" source="summaries.fxml"/>
+        <ScrollPane fx:id="summaryContainer"/>
     </center>
 
 </BorderPane>
