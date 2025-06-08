@@ -45,12 +45,55 @@ public class FuzzySet<T> {
                 .mapToDouble(this::membership)
                 .sum();
     }
+    public double getDegreeOfFuzziness() {
+        Set<T> support = getSupport();
+        Set<T> universe = domain.getSamples();
 
+        if (universe.isEmpty()) {
+            logger.warning("Empty universe for degree of fuzziness calculation");
+            return 0.0;
+        }
+
+        return (double) support.size() / universe.size();
+    }
+
+    /**
+     * Alternative implementation using sigma-count normalization
+     * (for continuous domains this might be more accurate)
+     */
+    public double getDegreeOfFuzzinessSigma() {
+        double sigmaCount = getSigmaCount();
+        int universeSize = domain.getSamples().size();
+
+        if (universeSize == 0) {
+            logger.warning("Empty universe for sigma-based degree of fuzziness");
+            return 0.0;
+        }
+
+        // Normalize sigma-count by universe size
+        return sigmaCount / universeSize;
+    }
     public double getHeight() {
         return domain.getSamples().stream()
                 .mapToDouble(this::membership)
                 .max()
                 .orElse(0.0);
+    }
+    public T findArgumentOfMaximum() {
+        Set<T> samples = domain.getSamples();
+
+        double maxMembership = 0.0;
+        T argMax = null;
+
+        for (T sample : samples) {
+            double membership = membership(sample);
+            if (membership > maxMembership) {
+                maxMembership = membership;
+                argMax = sample;
+            }
+        }
+
+        return argMax;
     }
 
     public boolean isNormal() {

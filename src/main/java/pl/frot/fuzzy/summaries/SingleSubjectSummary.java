@@ -117,30 +117,116 @@ public class SingleSubjectSummary {
                 return qualifier.getFuzzySet().membership(value);
             }
         }
-
         return 0.0;
     }
 
     // ===== MIARY JAKOŚCI - POZOSTAWIONE NA PRZYSZŁOŚĆ =====
 
     public double degreeOfImprecision() {
-        // TODO: Implementacja T2
-        return 0.0;
-    }
+        if (summarizers.isEmpty()) {
+            logger.warning("T2: No summarizers available");
+            return 0.0;
+        }
 
+        double product = 1.0;
+        for (Label summarizer : summarizers) {
+            // POPRAWKA: Użyj nowej metody z FuzzySet
+            double degreeOfFuzziness = summarizer.getFuzzySet().getDegreeOfFuzziness();
+            product *= degreeOfFuzziness;
+
+            // Debug log
+            logger.fine("Summarizer '" + summarizer.getName() + "' degree of fuzziness: " +
+                    String.format("%.3f", degreeOfFuzziness));
+        }
+
+        double nthRoot = Math.pow(product, 1.0 / summarizers.size());
+        double result = 1.0 - nthRoot;
+
+        logger.info("T2: " + String.format("%.3f", result) + " (summarizers: " + summarizers.size() + ")");
+        return result;
+    }
     public double degreeOfCovering() {
-        // TODO: Implementacja T3
-        return 0.0;
+        if (data == null || data.isEmpty()) {
+            logger.warning("T3: No data available");
+            return 0.0;
+        }
+
+        if (qualifier == null) {
+            // FORMA 1
+            int supportCount = 0;
+            for (Property property : data) {
+                if (calculateSummarizerMembership(property) > 0.0) {
+                    supportCount++;
+                }
+            }
+            double result = (double) supportCount / data.size();
+            logger.info("T3 (Form 1): " + supportCount + "/" + data.size() + " = " + String.format("%.3f", result));
+            return result;
+
+        } else {
+            // FORMA 2
+            int supportW = 0;
+            int supportSAndW = 0;
+
+            for (Property property : data) {
+                double qualifierMembership = calculateQualifierMembership(property);
+                if (qualifierMembership > 0.0) {
+                    supportW++;
+                    if (calculateSummarizerMembership(property) > 0.0) {
+                        supportSAndW++;
+                    }
+                }
+            }
+
+            if (supportW == 0) {
+                logger.warning("T3: No objects satisfy qualifier '" + qualifier.getName() + "'");
+                return 0.0;
+            }
+
+            double result = (double) supportSAndW / supportW;
+            logger.info("T3 (Form 2): " + supportSAndW + "/" + supportW + " = " + String.format("%.3f", result));
+            return result;
+        }
     }
 
     public double degreeOfAppropriateness() {
-        // TODO: Implementacja T4
-        return 0.0;
+        if (data == null || data.isEmpty()) {
+            logger.warning("T4: No data available");
+            return 0.0;
+        }
+
+        double t3 = degreeOfCovering();
+        double product = 1.0;
+
+        for (Label summarizer : summarizers) {
+            String attributeName = getAttributeNameFromLabel(summarizer);
+            Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+
+            if (extractor == null) {
+                logger.warning("T4: No extractor for attribute: " + attributeName);
+                return 0.0;
+            }
+
+            int countSatisfying = 0;
+            for (Property property : data) {
+                Double value = extractor.apply(property);
+                if (value != null && summarizer.getFuzzySet().membership(value) > 0.0) {
+                    countSatisfying++;
+                }
+            }
+
+            double rj = (double) countSatisfying / data.size();
+            product *= rj;
+        }
+
+        double result = Math.abs(product - t3);
+        logger.info("T4: " + String.format("%.3f", result) + " (product: " + String.format("%.3f", product) + ", T3: " + String.format("%.3f", t3) + ")");
+        return result;
     }
 
     public double summaryLength() {
-        // TODO: Implementacja T5
-        return 0.0;
+        int summarizerCount = summarizers.size();
+        return 2.0 * Math.pow(0.5, summarizerCount);
     }
 
     public double degreeOfQuantifierImprecision() {
@@ -171,6 +257,18 @@ public class SingleSubjectSummary {
     public double qualifierLength() {
         // TODO: Implementacja T11
         return 0.0;
+    }
+
+    private double[] extractAttributeValues(Label summarizer) {
+        String attributeName = getAttributeNameFromLabel(summarizer);
+        Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+
+        return data.stream()
+                .mapToDouble(property -> {
+                    Double value = extractor.apply(property);
+                    return value != null ? value : 0.0;
+                })
+                .toArray();
     }
 
     // ===== GETTERY I TOSTRING =====
