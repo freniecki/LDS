@@ -55,8 +55,17 @@ public class SummaryController {
         t3Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfCovering()).asObject());
 
+        TableColumn<SummaryDto, Double> t4Col = new TableColumn<>("T4");
+        t4Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().degreeOfAppropriateness()).asObject());
+
+        TableColumn<SummaryDto, Double> t5Col = new TableColumn<>("T5");
+        t5Col.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().summaryLength()).asObject());
+
+
         // Dodaj wszystkie kolumny
-        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, t1Col, t2Col, t3Col);
+        summaryTable.getColumns().addAll(summaryTextCol, qualifierCol, t1Col, t2Col, t3Col, t4Col, t5Col);
 
         // Ustawiamy dane
         summaryTable.getItems().clear();
@@ -70,13 +79,14 @@ public class SummaryController {
         List<SingleSubjectSummary> summaries = summaryMachine.createSingleSubjectSummaries(
                 quantifiers, qualifiers, labels);
 
-        // ZMIENIONE: Dodaj T2 i T3
         List<SummaryDto> summaryDtos = summaries.stream()
                 .map(s -> new SummaryDto(
                         s.toString(),
-                        s.degreeOfTruth(),           // T1
-                        s.degreeOfImprecision(),     // T2
-                        s.degreeOfCovering(),        // T3
+                        s.degreeOfTruth(),
+                        s.degreeOfImprecision(),
+                        s.degreeOfCovering(),
+                        s.degreeOfAppropriateness(),
+                        s.summaryLength(),
                         s.getQualifier() != null ? s.getQualifier().getName() : null))
                 .toList();
 
