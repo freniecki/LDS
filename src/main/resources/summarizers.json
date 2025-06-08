@@ -36,33 +36,33 @@
     "name": "elementarySchoolDistance",
     "uod": [0.1, 47.4, 0.1],
     "ranges": {
-      "za rogiem": [0.1, 0.1, 0.5, 1.0],
-      "piechotą": [0.5, 1.0, 2.5, 3.0],
-      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
-      "rowerem": [5.0, 6.5, 9.0, 10.0],
-      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
+      "za rogiem od podstawówki": [0.1, 0.1, 0.5, 1.0],
+      "piechotą od podstawówki": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem od podstawówki": [2.5, 3.0, 5.0, 6.5],
+      "rowerem od podstawówki": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem od podstawówki": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
     "name": "middleSchoolDistance",
     "uod": [0.1, 47.4, 0.1],
     "ranges": {
-      "za rogiem": [0.1, 0.1, 0.5, 1.0],
-      "piechotą": [0.5, 1.0, 2.5, 3.0],
-      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
-      "rowerem": [5.0, 6.5, 9.0, 10.0],
-      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
+      "za rogiem od gimnazjum": [0.1, 0.1, 0.5, 1.0],
+      "piechotą od gimnazjum": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem od gimnazjum": [2.5, 3.0, 5.0, 6.5],
+      "rowerem od gimnazjum": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem od gimnazjum": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
     "name": "highSchoolDistance",
     "uod": [0.1, 47.4, 0.1],
     "ranges": {
-      "za rogiem": [0.1, 0.1, 0.5, 1.0],
-      "piechotą": [0.5, 1.0, 2.5, 3.0],
-      "dłuższym spacerem": [2.5, 3.0, 5.0, 6.5],
-      "rowerem": [5.0, 6.5, 9.0, 10.0],
-      "koniecznie autem": [9.0, 10.0, 47.4, 47.4]
+      "za rogiem od liceum": [0.1, 0.1, 0.5, 1.0],
+      "piechotą od liceum": [0.5, 1.0, 2.5, 3.0],
+      "dłuższym spacerem od liceum": [2.5, 3.0, 5.0, 6.5],
+      "rowerem od liceum": [5.0, 6.5, 9.0, 10.0],
+      "koniecznie autem od liceum": [9.0, 10.0, 47.4, 47.4]
     }
   },
   {
