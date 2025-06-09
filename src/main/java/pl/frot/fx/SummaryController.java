@@ -31,6 +31,20 @@ public class SummaryController {
     private void addSummariesToTable(List<SummaryDto> summaryDtos) {
         summaryTable.getColumns().clear();
 
+        TableColumn<SummaryDto, Number> indexCol = new TableColumn<>("Lp.");
+        indexCol.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(getIndex() + 1));
+                }
+            }
+        });
+        indexCol.setSortable(false);
+
         TableColumn<SummaryDto, Boolean> selectedCol = new TableColumn<>("Zapisz");
         selectedCol.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectedCol.setCellFactory(CheckBoxTableCell.forTableColumn(selectedCol));
@@ -100,7 +114,7 @@ public class SummaryController {
                 new SimpleDoubleProperty(cellData.getValue().optimal()).asObject());
         tOptCol.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
-        summaryTable.getColumns().addAll(selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
+        summaryTable.getColumns().addAll(indexCol,selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
                 t6Col, t7Col, t8Col, t9Col, t10Col, t11Col, tOptCol);
         summaryTable.setEditable(true);
 
