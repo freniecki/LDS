@@ -278,9 +278,7 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfQualifierImprecision() {
-        // T9 = 1 - in(W)
         if (qualifier == null) {
-            logger.info("T9: No qualifier (form 1) = 0.0");
             return 0.0;
         }
 
@@ -289,9 +287,7 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfQualifierCardinality() {
-        // T10 = 1 - |W|/|Xg|
         if (qualifier == null) {
-            logger.info("T10: No qualifier (form 1) = 0.0");
             return 0.0;
         }
 
@@ -307,9 +303,6 @@ public class SingleSubjectSummary {
     }
 
     public double qualifierLength() {
-        if (qualifier == null) {
-            return 0.0;
-        }
         return 2 * 0.5;
     }
 
@@ -320,11 +313,11 @@ public class SingleSubjectSummary {
         }
 
         double sum = degreeOfTruth() * attributesWages.getFirst()
-                + degreeOfQuantifierCardinality() * attributesWages.get(1)
-                + degreeOfSummarizerCardinality() * attributesWages.get(2)
-                + degreeOfQualifierImprecision() * attributesWages.get(3)
-                + degreeOfQualifierCardinality() * attributesWages.get(4)
-                + summaryLength() * attributesWages.get(5)
+                + degreeOfImprecision() * attributesWages.get(1)
+                + degreeOfCovering() * attributesWages.get(2)
+                + degreeOfAppropriateness() * attributesWages.get(3)
+                + summaryLength() * attributesWages.get(4)
+                + degreeOfQuantifierImprecision() * attributesWages.get(5)
                 + degreeOfQuantifierCardinality() * attributesWages.get(6)
                 + degreeOfSummarizerCardinality() * attributesWages.get(7)
                 + degreeOfQualifierImprecision() * attributesWages.get(8)
