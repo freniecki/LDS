@@ -187,6 +187,10 @@ public class SummaryMachine {
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
 
         for (Quantifier quantifier : chosenQuantifiers) {
+            if (quantifier.type() == QuantifierType.ABSOLUTE) {
+                continue;
+            }
+
             for (Label qualifier : chosenQualifiers) {           // ← Iteruj po wybranych kwalifikatorach
                 for (List<Label> summarizers : labelCombinations) { // ← Wszystkie jako sumaryzatory
                     if (summarizers.contains(qualifier)) {
