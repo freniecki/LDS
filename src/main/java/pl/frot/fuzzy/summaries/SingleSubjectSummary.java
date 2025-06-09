@@ -324,7 +324,7 @@ public class SingleSubjectSummary {
                 + degreeOfSummarizerCardinality() * attributesWages.get(2)
                 + degreeOfQualifierImprecision() * attributesWages.get(3)
                 + degreeOfQualifierCardinality() * attributesWages.get(4)
-                + degreeOfTruth() * attributesWages.get(5)
+                + summaryLength() * attributesWages.get(5)
                 + degreeOfQuantifierCardinality() * attributesWages.get(6)
                 + degreeOfSummarizerCardinality() * attributesWages.get(7)
                 + degreeOfQualifierImprecision() * attributesWages.get(8)
