@@ -13,6 +13,7 @@ module LDS {
 
     exports pl.frot.fx;
     exports pl.frot.fuzzy.summaries;
+    exports pl.frot.data;
 
     opens pl.frot.fx to javafx.fxml;
     opens pl.frot.data to org.hibernate.orm.core, com.opencsv, com.fasterxml.jackson.databind;

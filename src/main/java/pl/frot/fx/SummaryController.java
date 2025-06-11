@@ -14,7 +14,6 @@ import pl.frot.fuzzy.summaries.Label;
 import pl.frot.fuzzy.summaries.Quantifier;
 import pl.frot.fuzzy.summaries.SingleSubjectSummary;
 import pl.frot.model.SummaryDto;
-import pl.frot.model.SummaryMachine;
 
 import java.util.List;
 import java.util.logging.Logger;

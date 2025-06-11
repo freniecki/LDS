@@ -1,8 +1,6 @@
 package pl.frot.fuzzy.summaries;
 
 import lombok.Getter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import pl.frot.data.Property;
 
 import java.util.*;
@@ -11,7 +9,6 @@ import java.util.logging.Logger;
 
 public class SingleSubjectSummary {
     private static final Logger logger = Logger.getLogger(SingleSubjectSummary.class.getName());
-    private static final Log log = LogFactory.getLog(SingleSubjectSummary.class);
 
     @Getter
     private final Quantifier quantifier;
@@ -338,7 +335,7 @@ public class SingleSubjectSummary {
         }
 
         StringBuilder summarizerValue = new StringBuilder(" jest ");
-        summarizerValue.append(summarizers.get(0).getName());
+        summarizerValue.append(summarizers.getFirst().getName());
         for (int i = 1; i < summarizers.size(); i++) {
             summarizerValue.append(" i ").append(summarizers.get(i).getName());
         }
