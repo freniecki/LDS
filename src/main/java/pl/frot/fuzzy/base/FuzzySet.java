@@ -2,13 +2,13 @@ package pl.frot.fuzzy.base;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class FuzzySet<T> {
 
     private static final Logger logger = Logger.getLogger(FuzzySet.class.getName());
 
     private final Universe<T> domain;
+
     private final MembershipFunction<T> membershipFunction;
 
     public FuzzySet(Universe<T> domain, MembershipFunction<T> membershipFunction) {
@@ -30,14 +30,14 @@ public class FuzzySet<T> {
                 .toList();
     }
 
-    public Set<T> getAlphaCut(double alpha) {
+    public List<T> getAlphaCut(double alpha) {
         if (alpha < 0.0 || alpha > 1.0) {
             logger.warning("Alpha must be in [0, 1]");
             throw new IllegalArgumentException();
         }
         return domain.getSamples().stream()
                 .filter(x -> membership(x) >= alpha)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     public double getSigmaCount() {
@@ -45,40 +45,18 @@ public class FuzzySet<T> {
                 .mapToDouble(this::membership)
                 .sum();
     }
+
     public double getDegreeOfFuzziness() {
-        List<T> support = getSupport();
-        List<T> universe = domain.getSamples();
-
-        if (universe.isEmpty()) {
-            logger.warning("Empty universe for degree of fuzziness calculation");
-            return 0.0;
-        }
-
-        return (double) support.size() / universe.size();
+        return getSigmaCount() / domain.getLength();
     }
 
-    /**
-     * Alternative implementation using sigma-count normalization
-     * (for continuous domains this might be more accurate)
-     */
-    public double getDegreeOfFuzzinessSigma() {
-        double sigmaCount = getSigmaCount();
-        int universeSize = domain.getSamples().size();
-
-        if (universeSize == 0) {
-            logger.warning("Empty universe for sigma-based degree of fuzziness");
-            return 0.0;
-        }
-
-        // Normalize sigma-count by universe size
-        return sigmaCount / universeSize;
-    }
     public double getHeight() {
         return domain.getSamples().stream()
                 .mapToDouble(this::membership)
                 .max()
                 .orElse(0.0);
     }
+
     public T findArgumentOfMaximum() {
         List<T> samples = domain.getSamples();
 
@@ -98,6 +76,10 @@ public class FuzzySet<T> {
 
     public boolean isNormal() {
         return getHeight() == 1.0;
+    }
+
+    public void normalize() {
+        // dupa
     }
 
     public boolean isConvex() {
@@ -121,12 +103,7 @@ public class FuzzySet<T> {
         return true;
     }
 
-    public FuzzySet<T> complement() {
-        MembershipFunction<T> complementFunction = x -> 1.0 - membership(x);
-        return new FuzzySet<>(domain, complementFunction);
-    }
-
-    // ==== SET OPERATIONS ====
+    // ============ SET OPERATIONS ============
 
     public FuzzySet<T> union(FuzzySet<T> other) {
         validateCompatibility(other);
@@ -146,7 +123,12 @@ public class FuzzySet<T> {
         return new FuzzySet<>(domain, intersectionFunction);
     }
 
-    // ===== UTILS =====
+    public FuzzySet<T> complement() {
+        MembershipFunction<T> complementFunction = x -> 1.0 - membership(x);
+        return new FuzzySet<>(domain, complementFunction);
+    }
+
+    // ============= UTILS =============
 
     private void validateCompatibility(FuzzySet<T> other) {
         if (!this.domain.equals(other.domain)) {
