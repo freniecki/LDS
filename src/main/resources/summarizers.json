@@ -3,11 +3,11 @@
     "name": "yearBuilt",
     "uod": [1850, 2020, 1],
     "ranges": {
-      "przedwojenny": [1850, 1850, 1918, 1941],
-      "powojenny": [1918, 1941, 1955, 1960],
-      "modernistyczny": [1955, 1960, 1970, 1980],
-      "postmodernistyczny": [1970, 1980, 2000, 2010],
-      "współczesny": [1995, 2010, 2020, 2020]
+      "przedwojenna": [1850, 1850, 1918, 1941],
+      "powojenna": [1918, 1941, 1955, 1960],
+      "modernistyczna": [1955, 1960, 1970, 1980],
+      "postmodernistyczna": [1970, 1980, 2000, 2010],
+      "współczesna": [1995, 2010, 2020, 2020]
     }
   },
   {
@@ -25,11 +25,11 @@
     "name": "totalInteriorLivableArea",
     "uod": [400, 16000, 100],
     "ranges": {
-      "kawalerski metraż": [400, 400, 500, 600],
-      "małe mieszkanie": [500, 600, 1200, 1300],
-      "przestrzenne": [1200, 1300, 2000, 2200],
+      "kawalerskiego metrażu": [400, 400, 500, 600],
+      "małym mieszkaniem": [500, 600, 1200, 1300],
+      "przestrzenna": [1200, 1300, 2000, 2200],
       "ponad standard": [2000, 2200, 3200, 3500],
-      "ogromne": [3200, 3500, 16000, 16000]
+      "ogromna": [3200, 3500, 16000, 16000]
     }
   },
   {
@@ -89,10 +89,10 @@
     "name": "listedPrice",
     "uod": [1499, 52000000, 10000],
     "ranges": {
-      "segment budżetowy": [1499, 1499, 500000, 800000],
-      "segment średni": [600000, 1000000, 3000000, 4000000],
-      "segment premium": [3500000, 5000000, 15000000, 20000000],
-      "segment luksusowy": [18000000, 25000000, 52000000, 52000000]
+      "segmentu budżetowego": [1499, 1499, 500000, 800000],
+      "segmentu średniego": [600000, 1000000, 3000000, 4000000],
+      "segmentu premium": [3500000, 5000000, 15000000, 20000000],
+      "segmentu luksusowego": [18000000, 25000000, 52000000, 52000000]
     }
   },
   {
