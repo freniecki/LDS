@@ -34,9 +34,9 @@ public class SummaryController {
         TableColumn<SummaryDto, Number> indexCol = new TableColumn<>("Lp.");
         indexCol.setCellFactory(column -> new TableCell<>() {
             @Override
-            protected void updateItem(Number item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
+            protected void updateItem(Number item, boolean isEmpty) {
+                super.updateItem(item, isEmpty);
+                if (isEmpty) {
                     setText(null);
                 } else {
                     setText(String.valueOf(getIndex() + 1));
@@ -134,19 +134,18 @@ public class SummaryController {
         List<SummaryDto> summaryDtos = summaries.stream()
                 .map(s -> new SummaryDto(
                         s.toString(),
-                        s.degreeOfTruth(),                      // T1
-                        s.degreeOfImprecision(),                // T2
-                        s.degreeOfCovering(),                   // T3
-                        s.degreeOfAppropriateness(),            // T4
-                        s.summaryLength(),                      // T5
-                        s.degreeOfQuantifierImprecision(),      // T6
-                        s.degreeOfQuantifierCardinality(),      // T7
-                        s.degreeOfSummarizerCardinality(),      // T8
-                        s.degreeOfQualifierImprecision(),       // T9
-                        s.degreeOfQualifierCardinality(),       // T10
-                        s.qualifierLength(),                    // T11
-                        s.optimalMeasure(),                            // T*
-                        s.getQualifier() != null ? s.getQualifier().getName() : null,
+                        s.getMeasures().get("T1"),
+                        s.getMeasures().get("T2"),
+                        s.getMeasures().get("T3"),
+                        s.getMeasures().get("T4"),
+                        s.getMeasures().get("T5"),
+                        s.getMeasures().get("T6"),
+                        s.getMeasures().get("T7"),
+                        s.getMeasures().get("T8"),
+                        s.getMeasures().get("T9"),
+                        s.getMeasures().get("T10"),
+                        s.getMeasures().get("T11"),
+                        s.getMeasures().get("T*"),
                                 new SimpleBooleanProperty(false))
                         )
                 .toList();
