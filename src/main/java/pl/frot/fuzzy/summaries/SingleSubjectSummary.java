@@ -1,16 +1,17 @@
 package pl.frot.fuzzy.summaries;
 
 import lombok.Getter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import pl.frot.data.Property;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class SingleSubjectSummary {
     private static final Logger logger = Logger.getLogger(SingleSubjectSummary.class.getName());
+    private static final Log log = LogFactory.getLog(SingleSubjectSummary.class);
 
     @Getter
     private final Quantifier quantifier;
@@ -22,14 +23,39 @@ public class SingleSubjectSummary {
     private final List<Property> properties;
     private final Map<String, Function<Property, Double>> attributeExtractors;
 
+    @Getter
+    private Map<String, Double> measures;
+
     public SingleSubjectSummary(Quantifier quantifier, Label qualifier, List<Label> summarizers,
                                 List<Property> properties,
                                 Map<String, Function<Property, Double>> attributeExtractors) {
         this.quantifier = quantifier;
         this.qualifier = qualifier;
+        if (summarizers.isEmpty()) {
+            logger.warning("Summarizers must contain at least 1 summarizer");
+            throw new RuntimeException("dupa");
+        }
         this.summarizers = summarizers;
         this.properties = properties;
         this.attributeExtractors = attributeExtractors;
+
+        createMeasures();
+    }
+
+    private void createMeasures() {
+        measures = new LinkedHashMap<>();
+        measures.put("T1", degreeOfTruth());
+        measures.put("T2", degreeOfImprecision());
+        measures.put("T3", degreeOfCovering());
+        measures.put("T4", degreeOfAppropriateness());
+        measures.put("T5", summaryLength());
+        measures.put("T6", degreeOfQuantifierImprecision());
+        measures.put("T7", degreeOfQuantifierCardinality());
+        measures.put("T8", degreeOfSummarizerCardinality());
+        measures.put("T9", degreeOfQualifierImprecision());
+        measures.put("T10", degreeOfQualifierCardinality());
+        measures.put("T11", qualifierLength());
+        measures.put("T*", optimalMeasure(List.of()));
     }
 
     public double degreeOfTruth() {
@@ -38,29 +64,21 @@ public class SingleSubjectSummary {
             return 0.0;
         }
 
-        if (qualifier == null) {
-            // ===== FORMA PIERWSZA: Q P are/have S =====
-            return calculateFirstForm();
-        } else {
-            // ===== FORMA DRUGA: Q P being/having W are/have S =====
-            return calculateSecondForm();
-        }
+        return qualifier == null ? calculateFirstForm() : calculateSecondForm();
     }
 
     private double calculateFirstForm() {
         double sigmaCountS = 0.0;
 
         for (Property property : properties) {
-            double summarizerMembership = calculateSummarizerMembership(property);
-            sigmaCountS += summarizerMembership;
+            sigmaCountS += calculateSummarizerMembership(property);
         }
 
-        double normalizedValue = switch (quantifier.type()) {
-            case ABSOLUTE -> sigmaCountS;
-            case RELATIVE -> sigmaCountS / properties.size();
-        };
+        if (quantifier.type() == QuantifierType.RELATIVE) {
+            sigmaCountS /= properties.size();
+        }
 
-        return quantifier.fuzzySet().membership(normalizedValue);
+        return quantifier.fuzzySet().membership(sigmaCountS);
     }
 
     private double calculateSecondForm() {
@@ -71,10 +89,8 @@ public class SingleSubjectSummary {
             double summarizerMembership = calculateSummarizerMembership(property);
             double qualifierMembership = calculateQualifierMembership(property);
 
+            sigmaCountSandW += Math.min(summarizerMembership, qualifierMembership);
             sigmaCountW += qualifierMembership;
-
-            double intersectionMembership = Math.min(summarizerMembership, qualifierMembership);
-            sigmaCountSandW += intersectionMembership;
         }
 
         if (sigmaCountW == 0.0) {
@@ -84,45 +100,6 @@ public class SingleSubjectSummary {
         return quantifier.fuzzySet().membership(sigmaCountSandW / sigmaCountW);
     }
 
-    // ===== METODY POMOCNICZE DLA T1 =====
-    private double calculateSummarizerMembership(Property property) {
-        double membership = 1.0; // T-norma (AND)
-
-        for (Label summarizer : summarizers) {
-            String attributeName = summarizer.getAttributeName();
-            Function<Property, Double> extractor = attributeExtractors.get(attributeName);
-            if (extractor == null) {
-                logger.warning("No extractor found for attribute: " + attributeName);
-                return 0.0;
-            } else {
-                Double value = extractor.apply(property);
-                if (value != null) {
-                    membership = Math.min(membership, summarizer.getFuzzySet().membership(value));
-                } else {
-                    return 0.0; // Null value = no membership
-                }
-            }
-        }
-
-        return membership;
-    }
-
-    private double calculateQualifierMembership(Property property) {
-        if (qualifier == null) return 1.0;
-
-        String attributeName = qualifier.getAttributeName();
-        Function<Property, Double> extractor = attributeExtractors.get(attributeName);
-        if (extractor != null) {
-            Double value = extractor.apply(property);
-            if (value != null) {
-                return qualifier.getFuzzySet().membership(value);
-            }
-        }
-        return 0.0;
-    }
-
-    // ===== MIARY JAKOŚCI - POZOSTAWIONE NA PRZYSZŁOŚĆ =====
-
     public double degreeOfImprecision() {
         if (summarizers.isEmpty()) {
             logger.warning("T2: No summarizers available");
@@ -131,27 +108,13 @@ public class SingleSubjectSummary {
 
         double product = 1.0;
         for (Label summarizer : summarizers) {
-            // POPRAWKA: Użyj nowej metody z FuzzySet
-            double degreeOfFuzziness = summarizer.getFuzzySet().getDegreeOfFuzziness();
-            product *= degreeOfFuzziness;
-
-            // Debug log
-            logger.fine("Summarizer '" + summarizer.getName() + "' degree of fuzziness: " +
-                    String.format("%.3f", degreeOfFuzziness));
+            product *= summarizer.getFuzzySet().getDegreeOfFuzziness();
         }
 
-        double nthRoot = Math.pow(product, 1.0 / summarizers.size());
-        double result = 1.0 - nthRoot;
-
-        return result;
+        return 1.0 - Math.pow(product, 1.0 / summarizers.size());
     }
 
     public double degreeOfCovering() {
-        if (properties == null || properties.isEmpty()) {
-            logger.warning("T3: No data available");
-            return 0.0;
-        }
-
         if (qualifier == null) {
             // FORMA 1
             int supportCount = 0;
@@ -160,8 +123,7 @@ public class SingleSubjectSummary {
                     supportCount++;
                 }
             }
-            double result = (double) supportCount / properties.size();
-            return result;
+            return (double) supportCount / properties.size();
 
         } else {
             // FORMA 2
@@ -183,18 +145,12 @@ public class SingleSubjectSummary {
                 return 0.0;
             }
 
-            double result = (double) supportSAndW / supportW;
-            return result;
+            return (double) supportSAndW / supportW;
         }
     }
 
     public double degreeOfAppropriateness() {
-        if (properties == null || properties.isEmpty()) {
-            logger.warning("T4: No data available");
-            return 0.0;
-        }
-
-        double t3 = degreeOfCovering();
+        double t3 = measures.get("T3");
         double product = 1.0;
 
         for (Label summarizer : summarizers) {
@@ -227,7 +183,6 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfQuantifierImprecision() {
-        // T6 = 1 - |supp(Q)| / |XQ|
         int supportSize = quantifier.fuzzySet().getSupport().size();
         int universeSize = quantifier.fuzzySet().getUniverse().getSamples().size();
 
@@ -240,7 +195,6 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfQuantifierCardinality() {
-        // T7 = 1 - |Q| / |XQ|
         double sigmaCount = quantifier.fuzzySet().getSigmaCount();
         int universeSize = quantifier.fuzzySet().getUniverse().getSamples().size();
 
@@ -253,7 +207,6 @@ public class SingleSubjectSummary {
     }
 
     public double degreeOfSummarizerCardinality() {
-        // T8 = 1 - (∏(j=1 to n) |Sj|/|Xj|)^(1/n)
         if (summarizers.isEmpty()) {
             logger.warning("T8: No summarizers available");
             return 0.0;
@@ -262,7 +215,7 @@ public class SingleSubjectSummary {
         double product = 1.0;
         for (Label summarizer : summarizers) {
             double sigmaCount = summarizer.getFuzzySet().getSigmaCount();
-            int universeSize = summarizer.getFuzzySet().getUniverse().getSamples().size();
+            double universeSize = summarizer.getFuzzySet().getUniverse().getLength();
 
             if (universeSize == 0) {
                 logger.warning("T8: Empty universe for summarizer: " + summarizer.getName());
@@ -306,37 +259,73 @@ public class SingleSubjectSummary {
         return 2 * 0.5;
     }
 
-    public double optimalMeasure() {
-        List<Double> attributesWages = new ArrayList<>(List.of(0.7));
-        for (int i = 0; i < 10; i++) {
-            attributesWages.add(0.03);
+    public double optimalMeasure(List<Double> wages) {
+        if (wages.isEmpty()) {
+            wages = new ArrayList<>(List.of(0.7));
+            wages.addAll(Collections.nCopies(10, 0.03));
+            logger.info(wages.toString());
         }
 
-        double sum = degreeOfTruth() * attributesWages.getFirst()
-                + degreeOfImprecision() * attributesWages.get(1)
-                + degreeOfCovering() * attributesWages.get(2)
-                + degreeOfAppropriateness() * attributesWages.get(3)
-                + summaryLength() * attributesWages.get(4)
-                + degreeOfQuantifierImprecision() * attributesWages.get(5)
-                + degreeOfQuantifierCardinality() * attributesWages.get(6)
-                + degreeOfSummarizerCardinality() * attributesWages.get(7)
-                + degreeOfQualifierImprecision() * attributesWages.get(8)
-                + degreeOfQualifierCardinality() * attributesWages.get(9)
-                + qualifierLength() * attributesWages.get(10);
+        logger.info(measures.values().toString());
 
-        return sum / 11;
+        return measures.get("T1") * wages.getFirst()
+                + measures.get("T2") * wages.get(1)
+                + measures.get("T3") * wages.get(2)
+                + measures.get("T4") * wages.get(3)
+                + measures.get("T5") * wages.get(4)
+                + measures.get("T6") * wages.get(5)
+                + measures.get("T7") * wages.get(6)
+                + measures.get("T8") * wages.get(7)
+                + measures.get("T9") * wages.get(8)
+                + measures.get("T10") * wages.get(9)
+                + measures.get("T11") * wages.get(10);
     }
 
-    private double[] extractAttributeValues(Label summarizer) {
-        String attributeName = summarizer.getAttributeName();
-        Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+    public void recalculateMeasures(List<Double> wages) {
+        if (wages.size() != 11) {
+            logger.warning("Wages must contain 11 values");
+            return;
+        }
+        double optimal = optimalMeasure(wages);
+        measures.put("T*", optimal);
+    }
+    
+    // ============ UTILS ============
 
-        return properties.stream()
-                .mapToDouble(property -> {
-                    Double value = extractor.apply(property);
-                    return value != null ? value : 0.0;
-                })
-                .toArray();
+    private double calculateSummarizerMembership(Property property) {
+        double membership = 1.0;
+
+        for (Label summarizer : summarizers) {
+            String attributeName = summarizer.getAttributeName();
+            Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+            if (extractor == null) {
+                logger.warning("No extractor found for attribute: " + attributeName);
+                return 0.0;
+            }
+
+            Double value = extractor.apply(property);
+            if (value == null) {
+                return 0.0;
+            }
+
+            membership = Math.min(membership, summarizer.getFuzzySet().membership(value));
+        }
+
+        return membership;
+    }
+
+    private double calculateQualifierMembership(Property property) {
+        if (qualifier == null) return 1.0;
+
+        String attributeName = qualifier.getAttributeName();
+        Function<Property, Double> extractor = attributeExtractors.get(attributeName);
+        if (extractor != null) {
+            Double value = extractor.apply(property);
+            if (value != null) {
+                return qualifier.getFuzzySet().membership(value);
+            }
+        }
+        return 0.0;
     }
 
     // ===== GETTERY I TOSTRING =====
@@ -359,4 +348,5 @@ public class SingleSubjectSummary {
                 + qualifierValue
                 + summarizerValue;
     }
+
 }
