@@ -158,7 +158,7 @@ public class SummaryMachine {
 
     public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
         logger.info("🔄 Generated " + labelCombinations.size() + " label combinations");
 
@@ -184,7 +184,7 @@ public class SummaryMachine {
             List<List<Label>> chosenLabels) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 4);
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
         for (Quantifier quantifier : chosenQuantifiers) {
             if (quantifier.type() == QuantifierType.ABSOLUTE) {
