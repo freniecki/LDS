@@ -1,5 +1,7 @@
 package pl.frot.fuzzy.base;
 
+import lombok.Getter;
+
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -9,6 +11,7 @@ public class FuzzySet<T> {
 
     private final Universe<T> domain;
 
+    @Getter
     private final MembershipFunction<T> membershipFunction;
 
     public FuzzySet(Universe<T> domain, MembershipFunction<T> membershipFunction) {
