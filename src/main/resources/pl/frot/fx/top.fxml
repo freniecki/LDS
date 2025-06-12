@@ -4,21 +4,21 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextField?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="pl.frot.fx.TopController"
-      prefHeight="150.0" prefWidth="1920.0" spacing="15.0">
+      prefHeight="150.0" prefWidth="1920.0" spacing="15.0" alignment="CENTER">
 
     <Button fx:id="createSingleSubjectSummariesButton" />
 
     <Button fx:id="saveSummariesButton" />
 
-    <Button fx:id="createNewLabelButton" />
+    <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>
     <ComboBox fx:id="labelTypeComboBox" />
     <ComboBox fx:id="universeTypeComboBox" />
-    <GridPane fx:id="universeParamsGridPane"/>
+    <GridPane fx:id="universeParamsGridPane" alignment="CENTER"/>
     <ComboBox fx:id="membershipTypeComboBox" />
-    <GridPane fx:id="membershipParamsGridPane"/>
-
-
+    <GridPane fx:id="membershipParamsGridPane" alignment="CENTER"/>
+    <Button fx:id="createNewLabelButton" text="Dodaj etykietę"/>
 </HBox>
