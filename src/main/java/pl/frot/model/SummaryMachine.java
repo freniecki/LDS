@@ -139,12 +139,8 @@ public class SummaryMachine {
         };
     }
 
-    public void addNewLabel(NewLabelDto newLabelDto) {
-
-    }
 
     // ==== SUMMARIZING ====
-
     public List<SingleSubjectSummary> createSingleSubjectSummaries(
             List<Quantifier> quantifiers,
             List<Label> qualifiers,
@@ -217,6 +213,43 @@ public class SummaryMachine {
     }
 
     // ==== UTILS ====
+
+    public boolean isNewLabelValid(NewLabelDto newLabelDto) {
+        FuzzySet<Double> newFuzzySet = newLabelDto.fuzzySet();
+
+        if (!newFuzzySet.isConvex()) {
+            logger.warning("Proposed fuzzy set is not convex!");
+            throw new IllegalArgumentException("Proposed fuzzy set is not convex!");
+        }
+
+        if (!newFuzzySet.isNormal()) {
+            newFuzzySet.normalize();
+        }
+
+        LabelType labelType = newLabelDto.labelType();
+        if (labelType == LabelType.QUANTIFIER_ABSOLUTE || labelType == LabelType.QUANTIFIER_RELATIVE) {
+            if (newFuzzySet.getUniverse().getDomainType() != DomainType.CONTINUOUS) {
+                logger.warning("UoD for quantifier must be of continuous type!");
+                throw new IllegalArgumentException("UoD for quantifier must be of continuous type!");
+            }
+
+            if (labelType == LabelType.QUANTIFIER_RELATIVE
+                    && newFuzzySet.getUniverse().getSamples().getFirst() != 0
+                    && newFuzzySet.getUniverse().getSamples().getLast() != 1) {
+                logger.warning("Relative quantifier must have UoD of [0,1]");
+                throw new IllegalArgumentException("Relative quantifier must have UoD of [0,1]");
+            }
+
+            if (labelType == LabelType.QUANTIFIER_ABSOLUTE
+                    && newFuzzySet.getUniverse().getSamples().getFirst() != 1
+                    && newFuzzySet.getUniverse().getSamples().getLast() != properties.size()) {
+                logger.warning("Absolute quantifier must have UoD of [1, size] | size=" + properties.size());
+                throw new IllegalArgumentException("Absolute quantifier must have UoD of properties size");
+            }
+        }
+
+        return true;
+    }
 
     public void saveToFile(List<String> strings) {
         DataWriter.saveToFile(strings);
