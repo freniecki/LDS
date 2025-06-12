@@ -30,7 +30,7 @@ public class SingleSubjectSummary {
         this.qualifier = qualifier;
         if (summarizers.isEmpty()) {
             logger.warning("Summarizers must contain at least 1 summarizer");
-            throw new RuntimeException("dupa");
+            throw new IllegalArgumentException("Summarizers must contain at least 1 summarizer");
         }
         this.summarizers = summarizers;
         this.properties = properties;
