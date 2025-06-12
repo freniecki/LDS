@@ -1,7 +1,6 @@
 package pl.frot.fuzzy.base;
 
 import java.util.List;
-import java.util.Set;
 
 public class DiscreteUniverse<T> implements Universe<T> {
     private final List<T> universe;
