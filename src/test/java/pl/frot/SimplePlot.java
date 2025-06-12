@@ -22,8 +22,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Logger;
 
 public class SimplePlot extends JPanel {
+    private final static Logger logger = Logger.getLogger(SimplePlot.class.getName());
+
     private final XYSeriesCollection dataset = new XYSeriesCollection();
     private final JFreeChart chart;
     private final String dirPath;
@@ -156,7 +159,7 @@ public class SimplePlot extends JPanel {
                         double d = variable.getValue().get(3);
                         yield plot.createTrapezoidalSeries(name, a, b, c, d);
                     default:
-                        throw new RuntimeException("dupa twojej starej");
+                        throw new IllegalStateException("params should be of 3 or 4 size, got: " + variable.getValue().size());
                 };
 
                 plot.dataset.addSeries(series);
@@ -182,7 +185,7 @@ public class SimplePlot extends JPanel {
                     Path.of(plot.dirPath + "/%s_zmienne.png".formatted(title)).toFile(),
                     plot.chart, 600, 400);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.warning("Cannot save plot to file");
         }
     }
 
