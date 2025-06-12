@@ -2,8 +2,8 @@ package pl.frot.fx;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +27,7 @@ public class MainController {
 
     @FXML private HBox topContainer;
     @FXML private VBox parametersContainer;
-    @FXML private ScrollPane summaryContainer;
+    @FXML private Pane summaryContainer;
 
     @FXML
     public void initialize() throws IOException {
@@ -43,7 +43,7 @@ public class MainController {
         topController.setMainController(this);
 
         FXMLLoader summaryLoader = new FXMLLoader(getClass().getResource("summaries.fxml"));
-        summaryContainer.setContent(summaryLoader.load());
+        summaryContainer.getChildren().add((summaryLoader.load()));
         summaryController = summaryLoader.getController();
         summaryController.setMainController(this);
     }
