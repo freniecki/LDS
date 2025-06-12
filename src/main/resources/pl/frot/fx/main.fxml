@@ -17,7 +17,7 @@
     </left>
 
     <center>
-        <ScrollPane fx:id="summaryContainer"/>
+        <Pane fx:id="summaryContainer"/>
     </center>
 
 </BorderPane>
