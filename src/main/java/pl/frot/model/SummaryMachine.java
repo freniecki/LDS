@@ -139,6 +139,10 @@ public class SummaryMachine {
         };
     }
 
+    public void addNewLabel(NewLabelDto newLabelDto) {
+
+    }
+
     // ==== SUMMARIZING ====
 
     public List<SingleSubjectSummary> createSingleSubjectSummaries(
