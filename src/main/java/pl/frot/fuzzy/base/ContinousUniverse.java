@@ -1,9 +1,7 @@
 package pl.frot.fuzzy.base;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class ContinousUniverse implements Universe<Double> {
 
@@ -22,6 +20,19 @@ public class ContinousUniverse implements Universe<Double> {
         this.start = start;
         this.end = end;
         this.step = step;
+    }
+
+    public ContinousUniverse(List<Double> params) {
+        if (params.get(2) <= 0) {
+            throw new IllegalArgumentException("Step must be positive");
+        }
+        if (params.getFirst() > params.get(1)) {
+            throw new IllegalArgumentException("Start must be <= end");
+        }
+
+        this.start = params.getFirst();
+        this.end = params.get(1);
+        this.step = params.get(2);
     }
 
     @Override
