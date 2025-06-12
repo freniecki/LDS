@@ -10,6 +10,8 @@ import lombok.Setter;
 import pl.frot.fuzzy.summaries.Label;
 import pl.frot.fuzzy.summaries.LinguisticVariable;
 import pl.frot.fuzzy.summaries.Quantifier;
+import pl.frot.fuzzy.summaries.QuantifierType;
+import pl.frot.model.NewLabelDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,4 +144,43 @@ public class ParametersController {
         return toggledQuantifiers;
     }
 
+    // ==== ADD NEW LABEL ====
+
+    public void addNewCustom(NewLabelDto newLabelDto) {
+        switch (newLabelDto.labelType()) {
+            case QUANTIFIER_ABSOLUTE:
+                addNewQuantifier(newLabelDto, QuantifierType.ABSOLUTE);
+                break;
+            case QUANTIFIER_RELATIVE:
+                addNewQuantifier(newLabelDto, QuantifierType.RELATIVE);
+                break;
+            case QUALIFIER:
+                addNewQualifier(newLabelDto);
+                break;
+            case SUMMARIZER:
+                addNewSummarizer(newLabelDto);
+        }
+        logger.info("New label added: " + newLabelDto.name());
+    }
+
+    public void addNewQuantifier(NewLabelDto newLabelDto, QuantifierType quantifierType) {
+        Quantifier quantifier = new Quantifier(newLabelDto.name(), quantifierType, newLabelDto.fuzzySet());
+        CheckBoxTreeItem<Object> quantifierTreeItem = new CheckBoxTreeItem<>(quantifier);
+        quantifierTreeItem.setSelected(false);
+        quantifiersTreeView.getRoot().getChildren().add(quantifierTreeItem);
+    }
+
+    private void addNewQualifier(NewLabelDto newLabelDto) {
+        Label label = new Label(newLabelDto.name(), newLabelDto.fuzzySet(), "custom");
+        CheckBoxTreeItem<Object> labelTreeItem = new CheckBoxTreeItem<>(label);
+        labelTreeItem.setSelected(false);
+        qualifiersTreeView.getRoot().getChildren().add(labelTreeItem);
+    }
+
+    public void addNewSummarizer(NewLabelDto newLabelDto) {
+        Label label = new Label(newLabelDto.name(), newLabelDto.fuzzySet(), "custom");
+        CheckBoxTreeItem<Object> labelTreeItem = new CheckBoxTreeItem<>(label);
+        labelTreeItem.setSelected(false);
+        linguisticVariableTreeView.getRoot().getChildren().add(labelTreeItem);
+    }
 }
