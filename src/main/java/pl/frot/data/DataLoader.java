@@ -35,6 +35,7 @@ public class DataLoader {
                 .filter(p -> p.getListedPrice() != null && p.getListedPrice() > 0)
                 .filter(p -> p.getLastSoldPrice() != null && p.getLastSoldPrice() > 0)
                 .filter(p -> p.getSoldPrice() != null && p.getSoldPrice() > 0)
+                .filter(p -> p.getZip() != null && p.getZip().length() == 5 && p.getZip().startsWith("9"))
                 .toList();
     }
 

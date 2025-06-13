@@ -19,7 +19,9 @@ public class SummaryMachine {
 
     private static final Logger logger = Logger.getLogger(SummaryMachine.class.getName());
     private final Map<String, Function<Property, Double>> attributeExtractors = new HashMap<>();
+
     List<Property> properties = new ArrayList<>();
+    Map<PropertyType, List<Property>> propertiesByType = new HashMap<>();
     @Getter
     List<LinguisticVariable> linguisticVariables = new ArrayList<>();
     @Getter
@@ -63,6 +65,8 @@ public class SummaryMachine {
             return false;
         }
 
+        checkProperties();
+
         List<TermDao> linguisticVariablesDao;
         try {
             linguisticVariablesDao = DataLoader.loadTerms("src/main/resources/summarizers.json");
@@ -85,6 +89,46 @@ public class SummaryMachine {
 
         logger.info("Data loaded successfully");
         return true;
+    }
+
+    private void checkProperties() {
+        for (PropertyType propertyType : PropertyType.values()) {
+            propertiesByType.put(propertyType, new ArrayList<>());
+        }
+
+        int[] counts = new int[7];
+        for (Property property : properties) {
+            char c = property.getZip().charAt(1);
+            int i = c - '0';
+            counts[i] += 1;
+            switch (c) {
+                case '0', '1':
+                    propertiesByType.get(PropertyType.LOS_ANGELES_AREA).add(property);
+                    break;
+                case '2':
+                    propertiesByType.get(PropertyType.SAN_FRANCISCO_PENINSULA).add(property);
+                    break;
+                case '3':
+                    propertiesByType.get(PropertyType.CENTRAL_CALIFORNIA).add(property);
+                    break;
+                case '4':
+                    propertiesByType.get(PropertyType.SAN_DIEGO_REGION).add(property);
+                    break;
+                case '5':
+                    propertiesByType.get(PropertyType.NORTHERN_CALIFORNIA).add(property);
+                    break; 
+                case '6':
+                    propertiesByType.get(PropertyType.MOUNTAIN_NORTHEAST).add(property);
+                    break; 
+                default:
+                    throw new IllegalArgumentException("Invalid 2nd number in zip code");
+            }
+        }
+        logger.info("""
+                Created properties by type map.
+                Zip codes distribution: %s
+                Zip codes sum: %s
+                """.formatted(Arrays.toString(counts), Arrays.stream(counts).sum()));
     }
 
     private void loadLinguisticVariables(List<TermDao> linguisticVariablesDaoList) {

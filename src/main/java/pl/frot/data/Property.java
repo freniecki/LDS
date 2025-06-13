@@ -42,4 +42,7 @@ public class Property {
     Double listedPrice;
     @CsvBindByName(column = "Sold Price")
     Double soldPrice;
+
+    @CsvBindByName(column = "Zip")
+    String zip;
 }
