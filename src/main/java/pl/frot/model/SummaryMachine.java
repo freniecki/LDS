@@ -21,7 +21,7 @@ public class SummaryMachine {
     private final Map<String, Function<Property, Double>> attributeExtractors = new HashMap<>();
 
     List<Property> properties = new ArrayList<>();
-    Map<PropertyType, List<Property>> propertiesByType = new HashMap<>();
+    Map<PropertyType, List<Property>> propertiesByType = new EnumMap<>(PropertyType.class);
     @Getter
     List<LinguisticVariable> linguisticVariables = new ArrayList<>();
     @Getter
