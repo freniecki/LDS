@@ -145,8 +145,8 @@ public class SummaryController {
                         s.getMeasures().get("T10"),
                         s.getMeasures().get("T11"),
                         s.getMeasures().get("T*"),
-                                new SimpleBooleanProperty(false))
-                        )
+                        new SimpleBooleanProperty(false))
+                )
                 .toList();
 
         addSummariesToTable(summaryDtos);

@@ -133,7 +133,7 @@ public class SummaryMachine {
 
     private void loadLinguisticVariables(List<TermDao> linguisticVariablesDaoList) {
         for (TermDao linguisticVariableDao : linguisticVariablesDaoList) {
-            String attributeName = linguisticVariableDao.name(); // nazwa z JSON
+            String attributeName = linguisticVariableDao.name();
             Map<String, List<Double>> ranges = linguisticVariableDao.ranges();
             List<Double> uod = properties.stream()
                     .map(p -> attributeExtractors.get(attributeName).apply(p))
@@ -255,6 +255,169 @@ public class SummaryMachine {
 
         return summaries;
     }
+
+    // ==== MULTISUBJECT SUMMARIZING ====
+
+    public List<MultisubjectSummary> createMultisubjectSummaries(
+            List<Quantifier> quantifiers,
+            List<Label> qualifiers,
+            List<List<Label>> summarizers) {
+
+        List<MultisubjectSummary> allSummaries = createFirstTypeMultisubjectSummaries(quantifiers, summarizers);
+
+        if (!qualifiers.isEmpty()) {
+            allSummaries.addAll(createSecondTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers)); // Form 2
+            allSummaries.addAll(createThirdTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));  // Form 3
+        }
+
+        return allSummaries;
+    }
+
+    public List<MultisubjectSummary> createFirstTypeMultisubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
+        List<MultisubjectSummary> summaries = new ArrayList<>();
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
+
+        // Create all possible pairs of property types
+        PropertyType[] types = PropertyType.values();
+        for (int i = 0; i < types.length; i++) {
+            for (int j = i + 1; j < types.length; j++) {
+                PropertyType type1 = types[i];
+                PropertyType type2 = types[j];
+
+                // Skip if either population is empty
+                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                    continue;
+                }
+
+                for (Quantifier quantifier : chosenQuantifiers) {
+                    // Only relative quantifiers for multisubject
+                    if (quantifier.type() != QuantifierType.RELATIVE) {
+                        continue;
+                    }
+
+                    for (List<Label> labelCombination : labelCombinations) {
+                        MultisubjectSummary summary = new MultisubjectSummary(
+                                quantifier,
+                                null,  // No qualifier for Form 1
+                                labelCombination,
+                                type1,
+                                type2,
+                                propertiesByType,
+                                attributeExtractors,
+                                false  // qualifierAppliesTo1 (not relevant when no qualifier)
+                        );
+                        summaries.add(summary);
+                    }
+                }
+            }
+        }
+
+        logger.info("🔄 Generated " + summaries.size() + " Form 1 multisubject summaries");
+        return summaries;
+    }
+
+    public List<MultisubjectSummary> createSecondTypeMultisubjectSummaries(
+            List<Quantifier> chosenQuantifiers,
+            List<Label> chosenQualifiers,
+            List<List<Label>> chosenLabels) {
+
+        List<MultisubjectSummary> summaries = new ArrayList<>();
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
+
+        // Create all possible pairs of property types
+        PropertyType[] types = PropertyType.values();
+        for (int i = 0; i < types.length; i++) {
+            for (int j = i + 1; j < types.length; j++) {
+                PropertyType type1 = types[i];
+                PropertyType type2 = types[j];
+
+                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                    continue;
+                }
+
+                for (Quantifier quantifier : chosenQuantifiers) {
+                    if (quantifier.type() != QuantifierType.RELATIVE) {
+                        continue;
+                    }
+
+                    for (Label qualifier : chosenQualifiers) {
+                        for (List<Label> labelCombination : labelCombinations) {
+                            if (labelCombination.contains(qualifier)) {
+                                continue;
+                            }
+
+                            MultisubjectSummary summary = new MultisubjectSummary(
+                                    quantifier,
+                                    qualifier,
+                                    labelCombination,
+                                    type1,
+                                    type2,
+                                    propertiesByType,
+                                    attributeExtractors,
+                                    false  // Form 2: qualifier applies to P₂
+                            );
+                            summaries.add(summary);
+                        }
+                    }
+                }
+            }
+        }
+
+        logger.info("🔄 Generated " + summaries.size() + " Form 2 multisubject summaries");
+        return summaries;
+    }
+
+    public List<MultisubjectSummary> createThirdTypeMultisubjectSummaries(
+            List<Quantifier> chosenQuantifiers,
+            List<Label> chosenQualifiers,
+            List<List<Label>> chosenLabels) {
+
+        List<MultisubjectSummary> summaries = new ArrayList<>();
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
+
+        // Create all possible pairs of property types
+        PropertyType[] types = PropertyType.values();
+        for (int i = 0; i < types.length; i++) {
+            for (int j = i + 1; j < types.length; j++) {
+                PropertyType type1 = types[i];
+                PropertyType type2 = types[j];
+
+                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                    continue;
+                }
+
+                for (Quantifier quantifier : chosenQuantifiers) {
+                    if (quantifier.type() != QuantifierType.RELATIVE) {
+                        continue;
+                    }
+
+                    for (Label qualifier : chosenQualifiers) {
+                        for (List<Label> labelCombination : labelCombinations) {
+                            if (labelCombination.contains(qualifier)) {
+                                continue;
+                            }
+
+                            MultisubjectSummary summary = new MultisubjectSummary(
+                                    quantifier,
+                                    qualifier,
+                                    labelCombination,
+                                    type1,
+                                    type2,
+                                    propertiesByType,
+                                    attributeExtractors,
+                                    true  // Form 3: qualifier applies to P₁
+                            );
+                            summaries.add(summary);
+                        }
+                    }
+                }
+            }
+        }
+
+        logger.info("🔄 Generated " + summaries.size() + " Form 3 multisubject summaries");
+        return summaries;
+    }
+
 
     // ==== UTILS ====
 

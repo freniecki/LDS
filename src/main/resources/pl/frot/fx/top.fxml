@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.*?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextField?>
+
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="pl.frot.fx.TopController"
       prefHeight="150.0" prefWidth="1920.0" spacing="15.0" alignment="CENTER">
 
     <Button fx:id="createSingleSubjectSummariesButton" />
-
+    <Button fx:id="createMultisubjectSummariesButton" />
     <Button fx:id="saveSummariesButton" />
 
     <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>

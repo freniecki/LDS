@@ -25,6 +25,7 @@ public class TopController {
     @FXML private Button createSingleSubjectSummariesButton;
     @FXML private Button saveSummariesButton;
     @FXML private Button createNewLabelButton;
+    @FXML private Button createMultisubjectSummariesButton;
 
     @FXML private TextField newLabelNameTextField;
     @FXML private ComboBox<LabelType> labelTypeComboBox;
@@ -46,6 +47,9 @@ public class TopController {
     private void initialize() {
         createSingleSubjectSummariesButton.setPadding(new Insets(10));
         createSingleSubjectSummariesButton.setText("Stwórz podsumowania jednopodmiotowe");
+
+        createMultisubjectSummariesButton.setPadding(new Insets(10));
+        createMultisubjectSummariesButton.setText("Stwórz podsumowania wielopodmiotowe");
 
         saveSummariesButton.setPadding(new Insets(10));
         saveSummariesButton.setText("Zapisz podsumowania");
@@ -73,7 +77,16 @@ public class TopController {
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
         createSingleSubjectSummariesButton.setOnAction(e -> mainController.createSingleSubjectSummaries());
-        saveSummariesButton.setOnAction(e -> mainController.getSummaryController().saveSummaries());
+        createMultisubjectSummariesButton.setOnAction(e -> mainController.createMultisubjectSummaries());
+
+        // Update save button to work with both views
+        saveSummariesButton.setOnAction(e -> {
+            if (mainController.isSingleSubjectViewActive()) {
+                mainController.getSummaryController().saveSummaries();
+            } else if (mainController.isMultisubjectViewActive()) {
+                mainController.getMultisubjectSummaryController().saveSummaries();
+            }
+        });
     }
 
     public void createNewLabel() {
