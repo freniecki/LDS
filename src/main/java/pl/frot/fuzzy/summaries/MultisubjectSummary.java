@@ -80,7 +80,7 @@ public class MultisubjectSummary {
     /**
      * FORM 1: T(Q P₁ w odniesieniu do P₂ jest S₁)
      */
-    private double calculateForm1() {
+    public double calculateForm1() {
         double sigmaCountP1 = 0.0;
         for (Property property : population1) {
             sigmaCountP1 += calculateSummarizerMembership(property);
@@ -107,7 +107,7 @@ public class MultisubjectSummary {
      * FORM 2: T(Q P₁ w odniesieniu do P₂ będących S₂ jest S₁)
      * Qualifier applies to P₂
      */
-    private double calculateForm2() {
+    public double calculateForm2() {
         // Σ-count(S₁_P₁ ∩ S₂_P₁) for P₁
         double sigmaCountS1AndS2P1 = 0.0;
         for (Property property : population1) {
@@ -144,7 +144,7 @@ public class MultisubjectSummary {
      * FORM 3: T(Q P₁ będących S₂ w odniesieniu do P₂ jest S₁)
      * Qualifier applies to P₁
      */
-    private double calculateForm3() {
+    public double calculateForm3() {
         // Σ-count(S₁_P₁ ∩ S₂_P₁) for P₁
         double sigmaCountS1AndS2P1 = 0.0;
         for (Property property : population1) {
@@ -287,6 +287,31 @@ public class MultisubjectSummary {
         return 0.0;
     }
 
+
+    /**
+     * Get degree of truth for specific form (1-4)
+     */
+    public int getFormNumber() {
+        if (quantifier == null) {
+            return 4;  // Form 4: no quantifier
+        } else if (qualifier == null) {
+            return 1;  // Form 1: quantifier but no qualifier
+        } else if (qualifierAppliesTo1) {
+            return 3;  // Form 3: qualifier applies to P₁
+        } else {
+            return 2;  // Form 2: qualifier applies to P₂
+        }
+    }
+
+    public double calculateFormByNumber(int formNumber) {
+        return switch(formNumber) {
+            case 1 -> calculateForm1();
+            case 2 -> calculateForm2();
+            case 3 -> calculateForm3();
+            case 4 -> calculateForm4();
+            default -> 0.0;
+        };
+    }
     // ===== GETTERS AND TOSTRING =====
 
     @Override
@@ -297,7 +322,12 @@ public class MultisubjectSummary {
             summarizerValue.append(" i ").append(summarizers.get(i).getName());
         }
 
-        if (qualifier == null) {
+        if (quantifier == null) {
+            // Form 4: "Więcej P₁ niż P₂ jest S₁"
+            return "Więcej nieruchomości w " + populationType1.toString().toLowerCase()
+                    + " niż w " + populationType2.toString().toLowerCase()
+                    + summarizerValue;
+        } else if (qualifier == null) {
             // Form 1
             return quantifier.name()
                     + " nieruchomości w " + populationType1.toString().toLowerCase()

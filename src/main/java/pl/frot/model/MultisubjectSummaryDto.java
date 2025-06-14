@@ -4,8 +4,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public record MultisubjectSummaryDto(
         String summary,
-        double degreeOfTruth,    // Forms 1-3 result
-        double form4Result,      // Form 4 result
+        double degreeOfTruth,    // T value for the specific form
+        int formNumber,          // Which form (1-4) is being used
         SimpleBooleanProperty selected
 ) {
     public boolean isSelected() {
