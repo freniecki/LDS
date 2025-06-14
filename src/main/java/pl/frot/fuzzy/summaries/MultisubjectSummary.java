@@ -54,30 +54,6 @@ public class MultisubjectSummary {
     }
 
     /**
-     * Calculates degree of truth for multisubject summary (Forms 1-3)
-     * Automatically determines form based on qualifier presence and application
-     */
-    public double degreeOfTruth() {
-        if (population1 == null || population2 == null) {
-            logger.warning("Population data not found for multisubject summary!");
-            return 0.0;
-        }
-
-        if (population1.isEmpty() || population2.isEmpty()) {
-            logger.warning("Both populations must be non-empty for multisubject summary!");
-            return 0.0;
-        }
-
-        if (qualifier == null) {
-            return calculateForm1();
-        } else if (qualifierAppliesTo1) {
-            return calculateForm3(); // Q P₁ będących S₂ w odniesieniu do P₂ jest S₁
-        } else {
-            return calculateForm2(); // Q P₁ w odniesieniu do P₂ będących S₂ jest S₁
-        }
-    }
-
-    /**
      * FORM 1: T(Q P₁ w odniesieniu do P₂ jest S₁)
      */
     public double calculateForm1() {

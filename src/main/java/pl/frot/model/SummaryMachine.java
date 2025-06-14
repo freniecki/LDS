@@ -278,7 +278,7 @@ public class SummaryMachine {
         List<MultisubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
+        // Create all possible pairs of property types - BOTH DIRECTIONS
         PropertyType[] types = PropertyType.values();
         for (int i = 0; i < types.length; i++) {
             for (int j = i + 1; j < types.length; j++) {
@@ -297,7 +297,8 @@ public class SummaryMachine {
                     }
 
                     for (List<Label> labelCombination : labelCombinations) {
-                        MultisubjectSummary summary = new MultisubjectSummary(
+                        // Create summary: type1 vs type2
+                        MultisubjectSummary summary1 = new MultisubjectSummary(
                                 quantifier,
                                 null,  // No qualifier for Form 1
                                 labelCombination,
@@ -307,16 +308,30 @@ public class SummaryMachine {
                                 attributeExtractors,
                                 false  // qualifierAppliesTo1 (not relevant when no qualifier)
                         );
-                        summaries.add(summary);
+                        summaries.add(summary1);
+
+                        // Immediately create reverse summary: type2 vs type1
+                        MultisubjectSummary summary2 = new MultisubjectSummary(
+                                quantifier,
+                                null,  // No qualifier for Form 1
+                                labelCombination,
+                                type2,  // Switched
+                                type1,  // Switched
+                                propertiesByType,
+                                attributeExtractors,
+                                false  // qualifierAppliesTo1 (not relevant when no qualifier)
+                        );
+                        summaries.add(summary2);
                     }
                 }
             }
         }
 
-        logger.info("🔄 Generated " + summaries.size() + " Form 1 multisubject summaries");
+        logger.info("🔄 Generated " + summaries.size() + " Form 1 multisubject summaries (bidirectional)");
         return summaries;
     }
 
+    // Modified version of createSecondTypeMultisubjectSummaries
     public List<MultisubjectSummary> createSecondTypeMultisubjectSummaries(
             List<Quantifier> chosenQuantifiers,
             List<Label> chosenQualifiers,
@@ -325,7 +340,7 @@ public class SummaryMachine {
         List<MultisubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
+        // Create all possible pairs of property types - BOTH DIRECTIONS
         PropertyType[] types = PropertyType.values();
         for (int i = 0; i < types.length; i++) {
             for (int j = i + 1; j < types.length; j++) {
@@ -347,7 +362,8 @@ public class SummaryMachine {
                                 continue;
                             }
 
-                            MultisubjectSummary summary = new MultisubjectSummary(
+                            // Create summary: type1 vs type2
+                            MultisubjectSummary summary1 = new MultisubjectSummary(
                                     quantifier,
                                     qualifier,
                                     labelCombination,
@@ -357,14 +373,27 @@ public class SummaryMachine {
                                     attributeExtractors,
                                     false  // Form 2: qualifier applies to P₂
                             );
-                            summaries.add(summary);
+                            summaries.add(summary1);
+
+                            // Immediately create reverse summary: type2 vs type1
+                            MultisubjectSummary summary2 = new MultisubjectSummary(
+                                    quantifier,
+                                    qualifier,
+                                    labelCombination,
+                                    type2,  // Switched
+                                    type1,  // Switched
+                                    propertiesByType,
+                                    attributeExtractors,
+                                    false  // Form 2: qualifier applies to P₂ (now the switched type2)
+                            );
+                            summaries.add(summary2);
                         }
                     }
                 }
             }
         }
 
-        logger.info("🔄 Generated " + summaries.size() + " Form 2 multisubject summaries");
+        logger.info("🔄 Generated " + summaries.size() + " Form 2 multisubject summaries (bidirectional)");
         return summaries;
     }
 
@@ -376,7 +405,7 @@ public class SummaryMachine {
         List<MultisubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
+        // Create all possible pairs of property types - BOTH DIRECTIONS
         PropertyType[] types = PropertyType.values();
         for (int i = 0; i < types.length; i++) {
             for (int j = i + 1; j < types.length; j++) {
@@ -398,7 +427,8 @@ public class SummaryMachine {
                                 continue;
                             }
 
-                            MultisubjectSummary summary = new MultisubjectSummary(
+                            // Create summary: type1 vs type2
+                            MultisubjectSummary summary1 = new MultisubjectSummary(
                                     quantifier,
                                     qualifier,
                                     labelCombination,
@@ -408,14 +438,27 @@ public class SummaryMachine {
                                     attributeExtractors,
                                     true  // Form 3: qualifier applies to P₁
                             );
-                            summaries.add(summary);
+                            summaries.add(summary1);
+
+                            // Immediately create reverse summary: type2 vs type1
+                            MultisubjectSummary summary2 = new MultisubjectSummary(
+                                    quantifier,
+                                    qualifier,
+                                    labelCombination,
+                                    type2,  // Switched
+                                    type1,  // Switched
+                                    propertiesByType,
+                                    attributeExtractors,
+                                    true  // Form 3: qualifier applies to P₁ (now the switched type2)
+                            );
+                            summaries.add(summary2);
                         }
                     }
                 }
             }
         }
 
-        logger.info("🔄 Generated " + summaries.size() + " Form 3 multisubject summaries");
+        logger.info("🔄 Generated " + summaries.size() + " Form 3 multisubject summaries (bidirectional)");
         return summaries;
     }
 
@@ -434,7 +477,8 @@ public class SummaryMachine {
                 }
 
                 for (List<Label> labelCombination : labelCombinations) {
-                    MultisubjectSummary summary = new MultisubjectSummary(
+                    // Create summary: type1 vs type2
+                    MultisubjectSummary summary1 = new MultisubjectSummary(
                             null,  // No quantifier for Form 4
                             null,  // No qualifier for Form 4
                             labelCombination,
@@ -444,14 +488,28 @@ public class SummaryMachine {
                             attributeExtractors,
                             false
                     );
-                    summaries.add(summary);
+                    summaries.add(summary1);
+
+                    // Immediately create reverse summary: type2 vs type1
+                    MultisubjectSummary summary2 = new MultisubjectSummary(
+                            null,  // No quantifier for Form 4
+                            null,  // No qualifier for Form 4
+                            labelCombination,
+                            type2,  // Switched
+                            type1,  // Switched
+                            propertiesByType,
+                            attributeExtractors,
+                            false
+                    );
+                    summaries.add(summary2);
                 }
             }
         }
 
-        logger.info("🔄 Generated " + summaries.size() + " Form 4 multisubject summaries");
+        logger.info("🔄 Generated " + summaries.size() + " Form 4 multisubject summaries (bidirectional)");
         return summaries;
     }
+
     // ==== UTILS ====
 
     public List<String> getLinguisticVariablesNames() {
