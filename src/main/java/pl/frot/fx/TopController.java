@@ -30,10 +30,7 @@ public class TopController {
     @FXML private TextField newLabelNameTextField;
     @FXML private ComboBox<LabelType> labelTypeComboBox;
 
-    @FXML private ComboBox<DomainType> universeTypeComboBox;
-    @FXML private GridPane universeParamsGridPane;
-    private final Map<String, TextField> universeParamsMap = new HashMap<>();
-    private final String[] universeParams = new String[]{"start", "end", "step"};
+    @FXML private ComboBox<String> linguisticVariableComboBox;
 
     @FXML private ComboBox<MembershipType> membershipTypeComboBox;
     @FXML private GridPane membershipParamsGridPane;
@@ -57,8 +54,10 @@ public class TopController {
         labelTypeComboBox.setItems(FXCollections.observableArrayList(LabelType.values()));
         labelTypeComboBox.setValue(LabelType.QUANTIFIER_ABSOLUTE);
 
-        universeTypeComboBox.setItems(FXCollections.observableArrayList(DomainType.values()));
-        universeTypeComboBox.setOnAction(e -> addToGrid(universeParams, universeParamsGridPane, universeParamsMap));
+        labelTypeComboBox.setOnAction(e -> {
+            boolean isLV = labelTypeComboBox.getValue() == LabelType.SUMMARIZER || labelTypeComboBox.getValue() == LabelType.QUALIFIER;
+            linguisticVariableComboBox.setVisible(isLV);
+        });
 
         membershipTypeComboBox.setItems(FXCollections.observableArrayList(MembershipType.values()));
         membershipTypeComboBox.setValue(MembershipType.TRIANGULAR);
@@ -79,6 +78,10 @@ public class TopController {
         createSingleSubjectSummariesButton.setOnAction(e -> mainController.createSingleSubjectSummaries());
         createMultisubjectSummariesButton.setOnAction(e -> mainController.createMultisubjectSummaries());
 
+        List<String> lvNames = mainController.getSummaryMachine().getLinguisticVariablesNames();
+        linguisticVariableComboBox.setItems(FXCollections.observableArrayList(lvNames));
+        linguisticVariableComboBox.setValue(lvNames.getFirst());
+
         // Update save button to work with both views
         saveSummariesButton.setOnAction(e -> {
             if (mainController.isSingleSubjectViewActive()) {
@@ -92,41 +95,22 @@ public class TopController {
     public void createNewLabel() {
         LabelType labelType = labelTypeComboBox.getValue();
         String labelName = newLabelNameTextField.getText();
-
+        String lvName = "";
+        if (labelType == LabelType.SUMMARIZER || labelType == LabelType.QUALIFIER) {
+            lvName = linguisticVariableComboBox.getValue();
+        }
         MembershipFunction<Double> membershipFunction = createMembershipFunction();
-        Universe<Double> universe = createUniverse();
-        FuzzySet<Double> fuzzySet = new FuzzySet<>(universe, membershipFunction);
 
-        NewLabelDto newLabelDto = new NewLabelDto(labelType, labelName, fuzzySet);
         logger.info("""
                 name: %s
                 type: %s
-                fuzzyUniverse: [%f, %f]
-                """.formatted(labelName, labelType,
-                fuzzySet.getUniverse().getSamples().getFirst(), fuzzySet.getUniverse().getSamples().getLast()));
-
-        boolean isValid = mainController.getSummaryMachine().isNewLabelValid(newLabelDto);
-        if (isValid) {
-            mainController.getParametersController().addNewCustom(newLabelDto);
-        }
+                lvName: %s
+                memFun: %s
+                """.formatted(labelName, labelType, lvName, membershipFunction.getClass().getName()));
+        mainController.addCustomLabel(new NewLabelDto(labelType, labelName, lvName, membershipFunction));
     }
 
     // ======== UTILS ========
-
-    private Universe<Double> createUniverse() {
-        List<Double> params = readFromGrid(universeParams, universeParamsMap);
-
-        return switch (universeTypeComboBox.getValue()) {
-            case DISCRETE -> {
-                List<Double> samples = new ArrayList<>();
-                for (double i = params.getFirst(); i <= params.get(1); i += params.get(2)) {
-                    samples.add(i);
-                }
-                yield new DiscreteUniverse<>(samples);
-            }
-            case CONTINUOUS -> new ContinousUniverse(params);
-        };
-    }
 
     private MembershipFunction<Double> createMembershipFunction() {
         List<Double> params;

@@ -16,8 +16,7 @@
 
     <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>
     <ComboBox fx:id="labelTypeComboBox" />
-    <ComboBox fx:id="universeTypeComboBox" />
-    <GridPane fx:id="universeParamsGridPane" alignment="CENTER"/>
+    <ComboBox fx:id="linguisticVariableComboBox" />
     <ComboBox fx:id="membershipTypeComboBox" />
     <GridPane fx:id="membershipParamsGridPane" alignment="CENTER"/>
     <Button fx:id="createNewLabelButton" text="Dodaj etykietę"/>

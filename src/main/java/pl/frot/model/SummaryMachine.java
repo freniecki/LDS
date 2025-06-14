@@ -116,10 +116,10 @@ public class SummaryMachine {
                     break;
                 case '5':
                     propertiesByType.get(PropertyType.NORTHERN_CALIFORNIA).add(property);
-                    break; 
+                    break;
                 case '6':
                     propertiesByType.get(PropertyType.MOUNTAIN_NORTHEAST).add(property);
-                    break; 
+                    break;
                 default:
                     throw new IllegalArgumentException("Invalid 2nd number in zip code");
             }
@@ -182,7 +182,6 @@ public class SummaryMachine {
             default -> throw new IllegalStateException("Unexpected value: " + funcParams.size());
         };
     }
-
 
     // ==== SUMMARIZING ====
     public List<SingleSubjectSummary> createSingleSubjectSummaries(
@@ -421,41 +420,58 @@ public class SummaryMachine {
 
     // ==== UTILS ====
 
-    public boolean isNewLabelValid(NewLabelDto newLabelDto) {
-        FuzzySet<Double> newFuzzySet = newLabelDto.fuzzySet();
+    public List<String> getLinguisticVariablesNames() {
+        return linguisticVariables.stream().map(LinguisticVariable::name).toList();
+    }
 
-        if (!newFuzzySet.isConvex()) {
+    public CustomLabelDto isNewLabelValid(NewLabelDto newLabelDto) {
+        Universe<Double> universe = createUniverse(newLabelDto.labelType(), newLabelDto.lvName());
+        FuzzySet<Double> fuzzySet = new FuzzySet<>(universe, newLabelDto.membershipFunction());
+
+        if (!fuzzySet.isConvex()) {
             logger.warning("Proposed fuzzy set is not convex!");
             throw new IllegalArgumentException("Proposed fuzzy set is not convex!");
         }
 
-        if (!newFuzzySet.isNormal()) {
-            newFuzzySet.normalize();
+        if (!fuzzySet.isNormal()) {
+            fuzzySet.normalize();
         }
 
         LabelType labelType = newLabelDto.labelType();
         if (labelType == LabelType.QUANTIFIER_ABSOLUTE || labelType == LabelType.QUANTIFIER_RELATIVE) {
-            if (newFuzzySet.getUniverse().getDomainType() != DomainType.CONTINUOUS) {
+            if (fuzzySet.getUniverse().getDomainType() != DomainType.CONTINUOUS) {
                 logger.warning("UoD for quantifier must be of continuous type!");
                 throw new IllegalArgumentException("UoD for quantifier must be of continuous type!");
             }
 
             if (labelType == LabelType.QUANTIFIER_RELATIVE
-                    && newFuzzySet.getUniverse().getSamples().getFirst() != 0
-                    && newFuzzySet.getUniverse().getSamples().getLast() != 1) {
+                    && (fuzzySet.getUniverse().getSamples().getFirst() != 0
+                    || fuzzySet.getUniverse().getSamples().getLast() != 1)) {
                 logger.warning("Relative quantifier must have UoD of [0,1]");
                 throw new IllegalArgumentException("Relative quantifier must have UoD of [0,1]");
             }
 
             if (labelType == LabelType.QUANTIFIER_ABSOLUTE
-                    && newFuzzySet.getUniverse().getSamples().getFirst() != 1
-                    && newFuzzySet.getUniverse().getSamples().getLast() != properties.size()) {
+                    && (fuzzySet.getUniverse().getSamples().getFirst() != 1
+                    || fuzzySet.getUniverse().getSamples().getLast() != properties.size())) {
                 logger.warning("Absolute quantifier must have UoD of [1, size] | size=" + properties.size());
                 throw new IllegalArgumentException("Absolute quantifier must have UoD of properties size");
             }
         }
 
-        return true;
+        return new CustomLabelDto(newLabelDto.labelType(), newLabelDto.name(), newLabelDto.lvName(), fuzzySet);
+    }
+
+    private Universe<Double> createUniverse(LabelType labelType, String lvName) {
+        return switch (labelType) {
+            case QUANTIFIER_RELATIVE -> new ContinousUniverse(0, 1, 0.01);
+            case QUANTIFIER_ABSOLUTE -> new ContinousUniverse(1, properties.size(), 1);
+            case QUALIFIER, SUMMARIZER -> {
+                Function<Property, Double> attributeExtractor = attributeExtractors.get(lvName);
+                List<Double> uod = properties.stream().map(attributeExtractor).toList();
+                yield new DiscreteUniverse<>(uod);
+            }
+        };
     }
 
     public void saveToFile(List<String> strings) {
