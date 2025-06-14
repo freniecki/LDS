@@ -214,37 +214,24 @@ public class MultisubjectSummary {
      * Calculate inclusion measure Inc(A, B) = |A ∩ B| / |A|
      * For fuzzy sets: Σ min(μA(x), μB(x)) / Σ μA(x)
      */
-    private double calculateInclusionMeasure(List<Double> membershipsA, List<Double> membershipsB) {
-        if (membershipsA.isEmpty() || membershipsB.isEmpty()) {
+    /**
+     * Calculate inclusion measure Inc(S(P₂), S(P₁)) correctly
+     * Compares average membership patterns between populations
+     */
+    private double calculateInclusionMeasure(List<Double> membershipsP2, List<Double> membershipsP1) {
+        if (membershipsP2.isEmpty() || membershipsP1.isEmpty()) {
             return 0.0;
         }
 
-        double intersectionSum = 0.0;
-        double sumA = 0.0;
+        // Calculate average membership degrees for both populations
+        double avgP1 = membershipsP1.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double avgP2 = membershipsP2.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
 
-        // Use minimum of the two sizes for comparison
-        int minSize = Math.min(membershipsA.size(), membershipsB.size());
+        // Simple inclusion: how much P₂'s average is contained in P₁'s average
+        if (avgP1 == 0.0) return 0.0;
 
-        for (int i = 0; i < minSize; i++) {
-            double membershipA = membershipsA.get(i);
-            double membershipB = membershipsB.get(i);
-
-            intersectionSum += Math.min(membershipA, membershipB);
-            sumA += membershipA;
-        }
-
-        // Add remaining elements from A if A is larger
-        for (int i = minSize; i < membershipsA.size(); i++) {
-            sumA += membershipsA.get(i);
-        }
-
-        if (sumA == 0.0) {
-            return 0.0;
-        }
-
-        return intersectionSum / sumA;
+        return Math.min(avgP2 / avgP1, 1.0);
     }
-
     /**
      * Calculate membership degree for summarizers
      */
