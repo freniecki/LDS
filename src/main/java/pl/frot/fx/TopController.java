@@ -37,7 +37,7 @@ public class TopController {
     private final Map<String, TextField> membershipParamsMap = new HashMap<>();
     private final String[] triangularParams = new String[]{"a", "b", "c"};
     private final String[] trapezoidalParams = new String[]{"a", "b", "c", "d"};
-    private final String[] gaussianParams = new String[]{"a", "b", "center", "sigma"};
+    private final String[] gaussianParams = new String[]{"center", "sigma"};
 
 
     @FXML
@@ -132,8 +132,8 @@ public class TopController {
             }
             case GAUSSIAN -> {
                 params = readFromGrid(gaussianParams, membershipParamsMap);
-                if (params.size() != 4) {
-                    throw new IllegalStateException("For gaussian expected 4 params, got: " + params.size());
+                if (params.size() != 2) {
+                    throw new IllegalStateException("For gaussian expected 2 params, got: " + params.size());
                 }
                 yield new GaussianFunction(params);
             }
