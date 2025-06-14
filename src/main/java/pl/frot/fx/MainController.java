@@ -8,6 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
+import pl.frot.model.CustomLabelDto;
+import pl.frot.model.NewLabelDto;
 import pl.frot.model.SummaryMachine;
 
 import java.io.IOException;
@@ -91,6 +93,13 @@ public class MainController {
     public void showMultisubjectView() {
         summaryContainer.getChildren().clear();
         summaryContainer.getChildren().add(multisubjectView);
+    }
+
+    // ===== ADD CUSTOM LABEL =====
+
+    public void addCustomLabel(NewLabelDto newLabelDto) {
+        CustomLabelDto customLabelDto = summaryMachine.isNewLabelValid(newLabelDto);
+        parametersController.addNewCustom(customLabelDto);
     }
 
     // ===== UTILITY METHODS =====
