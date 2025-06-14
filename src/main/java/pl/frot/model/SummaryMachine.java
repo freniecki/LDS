@@ -116,10 +116,10 @@ public class SummaryMachine {
                     break;
                 case '5':
                     propertiesByType.get(PropertyType.NORTHERN_CALIFORNIA).add(property);
-                    break; 
+                    break;
                 case '6':
                     propertiesByType.get(PropertyType.MOUNTAIN_NORTHEAST).add(property);
-                    break; 
+                    break;
                 default:
                     throw new IllegalArgumentException("Invalid 2nd number in zip code");
             }
@@ -266,9 +266,11 @@ public class SummaryMachine {
         List<MultisubjectSummary> allSummaries = createFirstTypeMultisubjectSummaries(quantifiers, summarizers);
 
         if (!qualifiers.isEmpty()) {
-            allSummaries.addAll(createSecondTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers)); // Form 2
-            allSummaries.addAll(createThirdTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));  // Form 3
+            allSummaries.addAll(createSecondTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));
+            allSummaries.addAll(createThirdTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));
         }
+
+        allSummaries.addAll(createFourthTypeMultisubjectSummaries(summarizers));
 
         return allSummaries;
     }
@@ -418,7 +420,39 @@ public class SummaryMachine {
         return summaries;
     }
 
+    public List<MultisubjectSummary> createFourthTypeMultisubjectSummaries(List<List<Label>> chosenLabels) {
+        List<MultisubjectSummary> summaries = new ArrayList<>();
+        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
+        PropertyType[] types = PropertyType.values();
+        for (int i = 0; i < types.length; i++) {
+            for (int j = i + 1; j < types.length; j++) {
+                PropertyType type1 = types[i];
+                PropertyType type2 = types[j];
+
+                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                    continue;
+                }
+
+                for (List<Label> labelCombination : labelCombinations) {
+                    MultisubjectSummary summary = new MultisubjectSummary(
+                            null,  // No quantifier for Form 4
+                            null,  // No qualifier for Form 4
+                            labelCombination,
+                            type1,
+                            type2,
+                            propertiesByType,
+                            attributeExtractors,
+                            false
+                    );
+                    summaries.add(summary);
+                }
+            }
+        }
+
+        logger.info("🔄 Generated " + summaries.size() + " Form 4 multisubject summaries");
+        return summaries;
+    }
     // ==== UTILS ====
 
     public boolean isNewLabelValid(NewLabelDto newLabelDto) {
