@@ -324,27 +324,27 @@ public class MultisubjectSummary {
 
         if (quantifier == null) {
             // Form 4: "Więcej P₁ niż P₂ jest S₁"
-            return "Więcej nieruchomości w " + populationType1.toString().toLowerCase()
-                    + " niż w " + populationType2.toString().toLowerCase()
+            return "Więcej nieruchomości w " + populationType1.propertyTypeName
+                    + " niż w " + populationType2.propertyTypeName
                     + summarizerValue;
         } else if (qualifier == null) {
             // Form 1
             return quantifier.name()
-                    + " nieruchomości w " + populationType1.toString().toLowerCase()
-                    + " w odniesieniu do " + populationType2.toString().toLowerCase()
+                    + " nieruchomości w " + populationType1.propertyTypeName
+                    + " w odniesieniu do " + populationType2.propertyTypeName
                     + summarizerValue;
         } else if (qualifierAppliesTo1) {
             // Form 3
             return quantifier.name()
-                    + " nieruchomości w " + populationType1.toString().toLowerCase()
+                    + " nieruchomości w " + populationType1.propertyTypeName
                     + " będących " + qualifier.getName()
-                    + " w odniesieniu do " + populationType2.toString().toLowerCase()
+                    + " w odniesieniu do " + populationType2.propertyTypeName
                     + summarizerValue;
         } else {
             // Form 2
             return quantifier.name()
-                    + " nieruchomości w " + populationType1.toString().toLowerCase()
-                    + " w odniesieniu do " + populationType2.toString().toLowerCase()
+                    + " nieruchomości w " + populationType1.propertyTypeName
+                    + " w odniesieniu do " + populationType2.propertyTypeName
                     + " będących " + qualifier.getName()
                     + summarizerValue;
         }
