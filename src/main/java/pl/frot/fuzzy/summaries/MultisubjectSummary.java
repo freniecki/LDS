@@ -2,6 +2,10 @@ package pl.frot.fuzzy.summaries;
 
 import lombok.Getter;
 import pl.frot.data.Property;
+import pl.frot.fuzzy.base.DiscreteUniverse;
+import pl.frot.fuzzy.base.FuzzySet;
+import pl.frot.fuzzy.base.MembershipFunction;
+import pl.frot.fuzzy.base.Universe;
 import pl.frot.model.PropertyType;
 
 import java.util.*;
@@ -56,24 +60,38 @@ public class MultisubjectSummary {
     /**
      * FORM 1: T(Q P₁ w odniesieniu do P₂ jest S₁)
      */
+    /**
+     * FORM 1: T(Q P₁ w odniesieniu do P₂ jest S₁)
+     * Wzór (6.8) - używa nfo-count, nie sigma-count
+     */
     public double calculateForm1() {
-        double sigmaCountP1 = 0.0;
+        // nfo-count(S̃(P₁)) - liczba elementów z pełną przynależnością
+        double nfoCountP1 = 0.0;
         for (Property property : population1) {
-            sigmaCountP1 += calculateSummarizerMembership(property);
+            if (calculateSummarizerMembership(property) == 1.0) {
+                nfoCountP1 += 1.0;
+            }
         }
 
-        double sigmaCountP2 = 0.0;
+        // nfo-count(S̃(P₂)) - liczba elementów z pełną przynależnością
+        double nfoCountP2 = 0.0;
         for (Property property : population2) {
-            sigmaCountP2 += calculateSummarizerMembership(property);
+            if (calculateSummarizerMembership(property) == 1.0) {
+                nfoCountP2 += 1.0;
+            }
         }
 
         int mP1 = population1.size();
         int mP2 = population2.size();
 
-        double numerator = (1.0 / mP1) * sigmaCountP1;
-        double denominator = (1.0 / mP1) * sigmaCountP1 + (1.0 / mP2) * sigmaCountP2;
+        double numerator = (1.0 / mP1) * nfoCountP1;
+        double denominator = (1.0 / mP1) * nfoCountP1 + (1.0 / mP2) * nfoCountP2;
 
-        if (denominator == 0.0) return 0.0;
+        if (denominator == 0.0) {
+            // Jeśli brak elementów spełniających warunek w obu zbiorach
+            // dla kwantyfikatora "mało" powinno zwrócić wysoką wartość
+            return quantifier.fuzzySet().membership(0.0);
+        }
 
         double ratio = numerator / denominator;
         return quantifier.fuzzySet().membership(ratio);
@@ -81,34 +99,46 @@ public class MultisubjectSummary {
 
     /**
      * FORM 2: T(Q P₁ w odniesieniu do P₂ będących S₂ jest S₁)
-     * Qualifier applies to P₂
+     * Wzór (6.13) - kwalifikator W̃ odnosi się do P₂
      */
     public double calculateForm2() {
-        // Σ-count(S₁_P₁ ∩ S₂_P₁) for P₁
-        double sigmaCountS1AndS2P1 = 0.0;
+        // nfo-count(S̃(P₁) ∩ W̃) - licznik
+        double nfoCountS1AndWP1 = 0.0;
         for (Property property : population1) {
             double summarizerMembership = calculateSummarizerMembership(property);
             double qualifierMembership = calculateQualifierMembership(property);
-            sigmaCountS1AndS2P1 += Math.min(summarizerMembership, qualifierMembership);
+
+            if (summarizerMembership == 1.0 && qualifierMembership == 1.0) {
+                nfoCountS1AndWP1 += 1.0;
+            }
         }
 
-        // Σ-count(S₂_P₁) for P₁
-        double sigmaCountS2P1 = 0.0;
+        // nfo-count(S̃(P₁)) - pierwszy składnik mianownika
+        double nfoCountS1P1 = 0.0;
         for (Property property : population1) {
-            sigmaCountS2P1 += calculateQualifierMembership(property);
+            if (calculateSummarizerMembership(property) == 1.0) {
+                nfoCountS1P1 += 1.0;
+            }
         }
 
-        // Σ-count(S₁_P₂) for P₂
-        double sigmaCountS1P2 = 0.0;
+        // nfo-count(S̃(P₂) ∩ W̃) - drugi składnik mianownika
+        // Dla P₂ sprawdzamy czy property należy do P₂ I ma kwalifikator W̃
+        double nfoCountS1AndWP2 = 0.0;
         for (Property property : population2) {
-            sigmaCountS1P2 += calculateSummarizerMembership(property);
+            double summarizerMembership = calculateSummarizerMembership(property);
+            // W Formie 2 kwalifikator odnosi się do P₂, więc sprawdzamy go dla P₂
+            double qualifierMembership = calculateQualifierMembership(property);
+
+            if (summarizerMembership == 1.0 && qualifierMembership == 1.0) {
+                nfoCountS1AndWP2 += 1.0;
+            }
         }
 
         int mP1 = population1.size();
         int mP2 = population2.size();
 
-        double numerator = (1.0 / mP1) * sigmaCountS1AndS2P1;
-        double denominator = (1.0 / mP1) * sigmaCountS2P1 + (1.0 / mP2) * sigmaCountS1P2;
+        double numerator = (1.0 / mP1) * nfoCountS1AndWP1;
+        double denominator = (1.0 / mP1) * nfoCountS1P1 + (1.0 / mP2) * nfoCountS1AndWP2;
 
         if (denominator == 0.0) return 0.0;
 
@@ -118,34 +148,38 @@ public class MultisubjectSummary {
 
     /**
      * FORM 3: T(Q P₁ będących S₂ w odniesieniu do P₂ jest S₁)
-     * Qualifier applies to P₁
+     * Wzór (6.17) - kwalifikator W̃ odnosi się do P₁
      */
     public double calculateForm3() {
-        // Σ-count(S₁_P₁ ∩ S₂_P₁) for P₁
-        double sigmaCountS1AndS2P1 = 0.0;
+        // nfo-count(S̃(P₁) ∩ W̃) - licznik (identyczny jak w Form 2)
+        double nfoCountS1AndWP1 = 0.0;
         for (Property property : population1) {
             double summarizerMembership = calculateSummarizerMembership(property);
             double qualifierMembership = calculateQualifierMembership(property);
-            sigmaCountS1AndS2P1 += Math.min(summarizerMembership, qualifierMembership);
+
+            if (summarizerMembership == 1.0 && qualifierMembership == 1.0) {
+                nfoCountS1AndWP1 += 1.0;
+            }
         }
 
-        // Σ-count(S₁_P₁) for P₁
-        double sigmaCountS1P1 = 0.0;
-        for (Property property : population1) {
-            sigmaCountS1P1 += calculateSummarizerMembership(property);
-        }
+        // POPRAWKA: pierwszy składnik mianownika to nfo-count(S̃(P₁) ∩ W̃), nie nfo-count(S̃(P₁))
+        // Zgodnie ze wzorem (6.17)
+        double nfoCountS1AndWP1_denominator = nfoCountS1AndWP1; // ten sam co licznik
 
-        // Σ-count(S₁_P₂) for P₂
-        double sigmaCountS1P2 = 0.0;
+        // nfo-count(S̃(P₂)) - drugi składnik mianownika
+        double nfoCountS1P2 = 0.0;
         for (Property property : population2) {
-            sigmaCountS1P2 += calculateSummarizerMembership(property);
+            if (calculateSummarizerMembership(property) == 1.0) {
+                nfoCountS1P2 += 1.0;
+            }
         }
 
         int mP1 = population1.size();
         int mP2 = population2.size();
 
-        double numerator = (1.0 / mP1) * sigmaCountS1AndS2P1;
-        double denominator = (1.0 / mP1) * sigmaCountS1P1 + (1.0 / mP2) * sigmaCountS1P2;
+        double numerator = (1.0 / mP1) * nfoCountS1AndWP1;
+        // POPRAWKA: używamy nfoCountS1AndWP1, nie nfoCountS1P1
+        double denominator = (1.0 / mP1) * nfoCountS1AndWP1_denominator + (1.0 / mP2) * nfoCountS1P2;
 
         if (denominator == 0.0) return 0.0;
 
@@ -154,8 +188,8 @@ public class MultisubjectSummary {
     }
 
     /**
-     * FORM 4: MLS4: Więcej P₁ niż P₂ jest S₁
-     * Formula: T() = 1 - m(Inc(S(P₂), S(P₁)))
+     * FORM 4: T(Więcej P₁ niż P₂ jest S̃) = 1 - m(Inc(S̃(P₁), S̃(P₂)))
+     * Kompletna implementacja wzoru (6.20)
      */
     public double calculateForm4() {
         if (population1 == null || population2 == null) {
@@ -168,45 +202,81 @@ public class MultisubjectSummary {
             return 0.0;
         }
 
-        // Get summarizer memberships for both populations
-        List<Double> membershipsP1 = new ArrayList<>();
-        for (Property property : population1) {
-            membershipsP1.add(calculateSummarizerMembership(property));
-        }
+        // KROK 1: Utwórz S̃(P₁) - zbiór rozmyty dla population1
+        FuzzySet<String> sP1 = createSummarizerFuzzySet("P1");
 
-        List<Double> membershipsP2 = new ArrayList<>();
-        for (Property property : population2) {
-            membershipsP2.add(calculateSummarizerMembership(property));
-        }
+        // KROK 2: Utwórz S̃(P₂) - zbiór rozmyty dla population2
+        FuzzySet<String> sP2 = createSummarizerFuzzySet("P2");
 
-        // Calculate inclusion measure Inc(S(P₂), S(P₁))
-        double inclusion = calculateInclusionMeasure(membershipsP2, membershipsP1);
+        // KROK 3: Oblicz Inc(S̃(P₁), S̃(P₂)) - zbiór rozmyty inkluzji
+        FuzzySet<String> incSet = calculateInclusionFuzzySet(sP1, sP2);
 
-        // Return 1 - m(inclusion)
-        return 1.0 - inclusion;
+        // KROK 4: Zastosuj m() - fuzzy measure (degree of fuzziness)
+        double m = incSet.getDegreeOfFuzziness();
+
+        // KROK 5: Return 1 - m(Inc(S̃(P₁), S̃(P₂)))
+        return 1.0 - m;
     }
 
     /**
-     * Calculate inclusion measure Inc(A, B) = |A ∩ B| / |A|
-     * For fuzzy sets: Σ min(μA(x), μB(x)) / Σ μA(x)
+     * Utwórz zbiór rozmyty sumaryzatora S̃(P) dla danej populacji
      */
-    /**
-     * Calculate inclusion measure Inc(S(P₂), S(P₁)) correctly
-     * Compares average membership patterns between populations
-     */
-    private double calculateInclusionMeasure(List<Double> membershipsP2, List<Double> membershipsP1) {
-        if (membershipsP2.isEmpty() || membershipsP1.isEmpty()) {
-            return 0.0;
+    private FuzzySet<String> createSummarizerFuzzySet(String populationName) {
+        // Wybierz populację
+        List<Property> population = populationName.equals("P1") ? population1 : population2;
+
+        // Uniwersum: ID wszystkich nieruchomości w populacji
+        List<String> universe = new ArrayList<>();
+        for (int i = 0; i < population.size(); i++) {
+            universe.add(populationName + "_property_" + i);
         }
 
-        // Calculate average membership degrees for both populations
-        double avgP1 = membershipsP1.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double avgP2 = membershipsP2.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        Universe<String> summarizerUniverse = new DiscreteUniverse<>(universe);
 
-        // Simple inclusion: how much P₂'s average is contained in P₁'s average
-        if (avgP1 == 0.0) return 0.0;
+        // Funkcja przynależności: oblicz membership każdej nieruchomości do sumaryzatorów
+        MembershipFunction<String> membershipFunction = propertyId -> {
+            // Wyciągnij indeks z ID (np. "P1_property_3" -> 3)
+            String[] parts = propertyId.split("_");
+            if (parts.length != 3) return 0.0;
 
-        return Math.min(avgP2 / avgP1, 1.0);
+            try {
+                int index = Integer.parseInt(parts[2]);
+                if (index >= 0 && index < population.size()) {
+                    Property property = population.get(index);
+                    return calculateSummarizerMembership(property);
+                }
+            } catch (NumberFormatException e) {
+                logger.warning("Invalid property ID: " + propertyId);
+            }
+            return 0.0;
+        };
+
+        return new FuzzySet<>(summarizerUniverse, membershipFunction);
+    }
+
+    /**
+     * Oblicz Inc(S̃(P₁), S̃(P₂)) jako zbiór rozmyty inkluzji
+     * Używa implikatora Łukasiewicza: I_Ł(a,b) = min(1, 1-a+b)
+     */
+    private FuzzySet<String> calculateInclusionFuzzySet(FuzzySet<String> sP1, FuzzySet<String> sP2) {
+        // Uniwersum inkluzji = unia elementów z obu zbiorów
+        Set<String> allElements = new HashSet<>();
+        allElements.addAll(sP1.getUniverse().getSamples());
+        allElements.addAll(sP2.getUniverse().getSamples());
+
+        List<String> inclusionUniverse = new ArrayList<>(allElements);
+        Universe<String> incUniverse = new DiscreteUniverse<>(inclusionUniverse);
+
+        // Funkcja przynależności inkluzji: Inc(A,B)(x) = I_Ł(μA(x), μB(x))
+        MembershipFunction<String> inclusionFunction = element -> {
+            double membershipP1 = sP1.membership(element);
+            double membershipP2 = sP2.membership(element);
+
+            // Implicator Łukasiewicza: I_Ł(a,b) = min(1, 1-a+b)
+            return Math.min(1.0, 1.0 - membershipP1 + membershipP2);
+        };
+
+        return new FuzzySet<>(incUniverse, inclusionFunction);
     }
     /**
      * Calculate membership degree for summarizers
