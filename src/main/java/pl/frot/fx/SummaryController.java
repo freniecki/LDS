@@ -52,7 +52,7 @@ public class SummaryController {
         TableColumn<SummaryDto, String> summaryTextCol = new TableColumn<>("Podsumowanie");
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
-
+        summaryTextCol.setPrefWidth(800);
         TableColumn<SummaryDto, Double> t1Col = new TableColumn<>("T1");
         t1Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfTruth()).asObject());

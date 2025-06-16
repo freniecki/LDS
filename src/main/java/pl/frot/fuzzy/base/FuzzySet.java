@@ -12,7 +12,7 @@ public class FuzzySet<T> {
     private final Universe<T> domain;
 
     @Getter
-    private final MembershipFunction<T> membershipFunction;
+    private MembershipFunction<T> membershipFunction;
 
     public FuzzySet(Universe<T> domain, MembershipFunction<T> membershipFunction) {
         this.domain = domain;
@@ -82,7 +82,13 @@ public class FuzzySet<T> {
     }
 
     public void normalize() {
-        // dupa
+        double maxMembership = getHeight(); // Używaj istniejącej metody
+
+        if (maxMembership > 0 && maxMembership != 1.0) {
+            // Stwórz nową funkcję przynależności która dzieli przez max
+            MembershipFunction<T> originalFunction = this.membershipFunction;
+            this.membershipFunction = x -> originalFunction.apply(x) / maxMembership;
+        }
     }
 
     public boolean isConvex() {

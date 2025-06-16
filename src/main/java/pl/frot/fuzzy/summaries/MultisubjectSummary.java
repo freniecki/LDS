@@ -356,30 +356,28 @@ public class MultisubjectSummary {
         }
 
         if (quantifier == null) {
-            // Form 4: "Więcej P₁ niż P₂ jest S₁"
-            return "Więcej nieruchomości w " + populationType1.propertyTypeName
-                    + " niż w " + populationType2.propertyTypeName
+            // Form 4: "Więcej P₁ niż P₂ jest S̃"
+            return "Więcej nieruchomości " + populationType1.propertyTypeName
+                    + " niż " + populationType2.propertyTypeName
                     + summarizerValue;
         } else if (qualifier == null) {
-            // Form 1
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " w odniesieniu do " + populationType2.propertyTypeName
+            // Form 1: "Q̃ P₁ w porównaniu do P₂ jest S̃"
+            return quantifier.name() + " nieruchomości " + populationType1.propertyTypeName
+                    + " w porównaniu do " + populationType2.propertyTypeName
                     + summarizerValue;
         } else if (qualifierAppliesTo1) {
-            // Form 3
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " będących " + qualifier.getName()
-                    + " w odniesieniu do " + populationType2.propertyTypeName
+            // Form 3: "Q̃ P₁, które są W̃, w porównaniu do P₂, jest S̃"
+            return quantifier.name() + " nieruchomości " + populationType1.propertyTypeName
+                    + ", które są " + qualifier.getName()
+                    + ", w porównaniu do " + populationType2.propertyTypeName
                     + summarizerValue;
         } else {
-            // Form 2
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " w odniesieniu do " + populationType2.propertyTypeName
-                    + " będących " + qualifier.getName()
+            // Form 2: "Q̃ P₁ w porównaniu do tych P₂, które są W̃, jest S̃"
+            return quantifier.name() + " nieruchomości " + populationType1.propertyTypeName
+                    + " w porównaniu do tych " + populationType2.propertyTypeName
+                    + ", które są " + qualifier.getName()
                     + summarizerValue;
         }
     }
 }
+

@@ -74,6 +74,7 @@ public class MultisubjectSummaryController {
 
         TableColumn<MultisubjectSummaryDto, String> summaryTextCol = new TableColumn<>("Podsumowanie");
         summaryTextCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().summary()));
+        summaryTextCol.setPrefWidth(800);
 
         TableColumn<MultisubjectSummaryDto, Integer> formNumberCol = new TableColumn<>("Forma");
         formNumberCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().formNumber()).asObject());
