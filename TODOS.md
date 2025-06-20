@@ -12,3 +12,4 @@
 
 ## PODSUMOWANIA WIELOPODMIOTOWE
 - sprawdzić kombinacje podmiotowe, żeby było: [[P2, P5], [P5, P2]]
+- ograniczyć ilość wybranych jednocześnie reginów do 2 max
