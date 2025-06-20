@@ -260,10 +260,7 @@ public class SingleSubjectSummary {
         if (wages.isEmpty()) {
             wages = new ArrayList<>(List.of(0.7));
             wages.addAll(Collections.nCopies(10, 0.03));
-            logger.info(wages.toString());
         }
-
-        logger.info(measures.values().toString());
 
         return measures.get("T1") * wages.getFirst()
                 + measures.get("T2") * wages.get(1)
