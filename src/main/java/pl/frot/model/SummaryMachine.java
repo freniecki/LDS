@@ -7,6 +7,10 @@ import pl.frot.data.TermDao;
 import pl.frot.data.DataLoader;
 import pl.frot.fuzzy.base.*;
 import pl.frot.fuzzy.summaries.*;
+import pl.frot.model.dtos.CustomLabelDto;
+import pl.frot.model.dtos.NewLabelDto;
+import pl.frot.model.enums.LabelType;
+import pl.frot.model.enums.PropertyType;
 import pl.frot.utils.SetOperations;
 
 import java.io.FileNotFoundException;
@@ -21,11 +25,24 @@ public class SummaryMachine {
     private final Map<String, Function<Property, Double>> attributeExtractors = new HashMap<>();
 
     List<Property> properties = new ArrayList<>();
+    @Getter
     Map<PropertyType, List<Property>> propertiesByType = new EnumMap<>(PropertyType.class);
     @Getter
     List<LinguisticVariable> linguisticVariables = new ArrayList<>();
     @Getter
     List<Quantifier> quantifiers = new ArrayList<>();
+
+    // ==========================================================
+    // ====================== INITIALIZATION ====================
+    // ==========================================================
+
+    public void run() {
+        initializeAttributeExtractors();
+
+        if (!loadData()) {
+            logger.warning("Failed to load data");
+        }
+    }
 
     private void initializeAttributeExtractors() {
         attributeExtractors.put("soldPrice", Property::getSoldPrice);
@@ -46,15 +63,9 @@ public class SummaryMachine {
         return yearBuilt != null ? yearBuilt.doubleValue() : null;
     }
 
-    public void run() {
-        initializeAttributeExtractors();
-
-        if (!loadData()) {
-            logger.warning("Failed to load data");
-        }
-    }
-
-    // ==== DATA LOADING ====
+    // ==========================================================
+    // ======================== DATA LOADING ====================
+    // ==========================================================
 
     public boolean loadData() {
         try {
@@ -183,11 +194,12 @@ public class SummaryMachine {
         };
     }
 
-    // ==== SUMMARIZING ====
-    public List<SingleSubjectSummary> createSingleSubjectSummaries(
-            List<Quantifier> quantifiers,
-            List<Label> qualifiers,
-            List<List<Label>> summarizers) {
+    // ==========================================================
+    // ====================== SUMMARIZING =======================
+    // ==========================================================
+
+    public List<SingleSubjectSummary> createSingleSubjectSummaries(List<Quantifier> quantifiers, List<Label> qualifiers,
+                                                                   List<List<Label>> summarizers) {
 
         List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, summarizers);
 
@@ -198,7 +210,8 @@ public class SummaryMachine {
         return allSummaries;
     }
 
-    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
+    public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers,
+                                                                            List<List<Label>> chosenLabels) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
@@ -220,10 +233,9 @@ public class SummaryMachine {
         return summaries;
     }
 
-    public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(
-            List<Quantifier> chosenQuantifiers,
-            List<Label> chosenQualifiers,
-            List<List<Label>> chosenLabels) {
+    public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers,
+                                                                             List<Label> chosenQualifiers,
+                                                                             List<List<Label>> chosenLabels) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
@@ -255,60 +267,66 @@ public class SummaryMachine {
         return summaries;
     }
 
-    // ==== MULTISUBJECT SUMMARIZING ====
+    // ==========================================================
+    // ================ MULTISUBJECT SUMMARIZING ================
+    // ==========================================================
 
-    public List<MultisubjectSummary> createMultisubjectSummaries(
-            List<Quantifier> quantifiers,
-            List<Label> qualifiers,
-            List<List<Label>> summarizers) {
+    public List<MultisubjectSummary> createMultisubjectSummaries(List<Quantifier> quantifiers, List<Label> qualifiers,
+                                                                 List<List<Label>> summarizers,
+                                                                 List<PropertyType> subjects) {
 
-        List<MultisubjectSummary> allSummaries = createFirstTypeMultisubjectSummaries(quantifiers, summarizers);
+        List<List<Label>> summarizerCombinations = SetOperations.getCrossListCombinations(summarizers, 3);
+        summarizerCombinations = summarizerCombinations.stream().filter(s -> s.size() > 1).toList();
+        logger.info("Summarizers combinations: " + summarizerCombinations);
 
+        List<List<PropertyType>> subjectsLists = subjects.stream().map(List::of).toList();
+        List<List<PropertyType>> subjectCombinations = SetOperations.getCrossListCombinations(subjectsLists, 2);
+        logger.info("Subjects combinations: " + subjectCombinations);
+        subjectCombinations = subjectCombinations.stream().filter(s -> s.size() > 1).toList();
+        logger.info("Subjects combinations: " + subjectCombinations);
+
+
+        List<MultisubjectSummary> allSummaries = createFirstTypeMultisubjectSummaries(quantifiers, summarizerCombinations, subjectCombinations);
         if (!qualifiers.isEmpty()) {
-            allSummaries.addAll(createSecondTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));
-            allSummaries.addAll(createThirdTypeMultisubjectSummaries(quantifiers, qualifiers, summarizers));
+            allSummaries.addAll(createSecondTypeMultisubjectSummaries(quantifiers, qualifiers, summarizerCombinations, subjectCombinations));
+            allSummaries.addAll(createThirdTypeMultisubjectSummaries(quantifiers, qualifiers, summarizerCombinations, subjectCombinations));
         }
-
-        allSummaries.addAll(createFourthTypeMultisubjectSummaries(summarizers));
+        allSummaries.addAll(createFourthTypeMultisubjectSummaries(summarizerCombinations, subjectCombinations));
 
         return allSummaries;
     }
 
-    public List<MultisubjectSummary> createFirstTypeMultisubjectSummaries(List<Quantifier> chosenQuantifiers, List<List<Label>> chosenLabels) {
+    public List<MultisubjectSummary> createFirstTypeMultisubjectSummaries(List<Quantifier> chosenQuantifiers,
+                                                                          List<List<Label>> labelCombinations,
+                                                                          List<List<PropertyType>> subjectCombinations) {
         List<MultisubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
-        PropertyType[] types = PropertyType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                PropertyType type1 = types[i];
-                PropertyType type2 = types[j];
+        for (List<PropertyType> subjectCombination : subjectCombinations) {
+            PropertyType type1 = subjectCombination.getFirst();
+            PropertyType type2 = subjectCombination.get(1);
 
-                // Skip if either population is empty
-                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+            if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                continue;
+            }
+
+            for (Quantifier quantifier : chosenQuantifiers) {
+                // Only relative quantifiers for multisubject
+                if (quantifier.type() != QuantifierType.RELATIVE) {
                     continue;
                 }
 
-                for (Quantifier quantifier : chosenQuantifiers) {
-                    // Only relative quantifiers for multisubject
-                    if (quantifier.type() != QuantifierType.RELATIVE) {
-                        continue;
-                    }
-
-                    for (List<Label> labelCombination : labelCombinations) {
-                        MultisubjectSummary summary = new MultisubjectSummary(
-                                quantifier,
-                                null,  // No qualifier for Form 1
-                                labelCombination,
-                                type1,
-                                type2,
-                                propertiesByType,
-                                attributeExtractors,
-                                false  // qualifierAppliesTo1 (not relevant when no qualifier)
-                        );
-                        summaries.add(summary);
-                    }
+                for (List<Label> labelCombination : labelCombinations) {
+                    MultisubjectSummary summary = new MultisubjectSummary(
+                            quantifier,
+                            null,  // No qualifier for Form 1
+                            labelCombination,
+                            MultiSubjectForm.FIRST,
+                            type1,
+                            type2,
+                            propertiesByType,
+                            attributeExtractors
+                    );
+                    summaries.add(summary);
                 }
             }
         }
@@ -317,48 +335,42 @@ public class SummaryMachine {
         return summaries;
     }
 
-    public List<MultisubjectSummary> createSecondTypeMultisubjectSummaries(
-            List<Quantifier> chosenQuantifiers,
-            List<Label> chosenQualifiers,
-            List<List<Label>> chosenLabels) {
-
+    public List<MultisubjectSummary> createSecondTypeMultisubjectSummaries(List<Quantifier> quantifiers,
+                                                                           List<Label> qualifiers,
+                                                                           List<List<Label>> labelCombinations,
+                                                                           List<List<PropertyType>> subjectCombinations) {
         List<MultisubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
-        PropertyType[] types = PropertyType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                PropertyType type1 = types[i];
-                PropertyType type2 = types[j];
+        for (List<PropertyType> subjectCombination : subjectCombinations) {
+            PropertyType type1 = subjectCombination.getFirst();
+            PropertyType type2 = subjectCombination.get(1);
 
-                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+            if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                continue;
+            }
+
+            for (Quantifier quantifier : quantifiers) {
+                if (quantifier.type() != QuantifierType.RELATIVE) {
                     continue;
                 }
 
-                for (Quantifier quantifier : chosenQuantifiers) {
-                    if (quantifier.type() != QuantifierType.RELATIVE) {
-                        continue;
-                    }
-
-                    for (Label qualifier : chosenQualifiers) {
-                        for (List<Label> labelCombination : labelCombinations) {
-                            if (labelCombination.contains(qualifier)) {
-                                continue;
-                            }
-
-                            MultisubjectSummary summary = new MultisubjectSummary(
-                                    quantifier,
-                                    qualifier,
-                                    labelCombination,
-                                    type1,
-                                    type2,
-                                    propertiesByType,
-                                    attributeExtractors,
-                                    false  // Form 2: qualifier applies to P₂
-                            );
-                            summaries.add(summary);
+                for (Label qualifier : qualifiers) {
+                    for (List<Label> labelCombination : labelCombinations) {
+                        if (labelCombination.contains(qualifier)) {
+                            continue;
                         }
+
+                        MultisubjectSummary summary = new MultisubjectSummary(
+                                quantifier,
+                                qualifier,
+                                labelCombination,
+                                MultiSubjectForm.SECOND,
+                                type1,
+                                type2,
+                                propertiesByType,
+                                attributeExtractors
+                        );
+                        summaries.add(summary);
                     }
                 }
             }
@@ -368,48 +380,42 @@ public class SummaryMachine {
         return summaries;
     }
 
-    public List<MultisubjectSummary> createThirdTypeMultisubjectSummaries(
-            List<Quantifier> chosenQuantifiers,
-            List<Label> chosenQualifiers,
-            List<List<Label>> chosenLabels) {
-
+    public List<MultisubjectSummary> createThirdTypeMultisubjectSummaries(List<Quantifier> chosenQuantifiers,
+                                                                          List<Label> chosenQualifiers,
+                                                                          List<List<Label>> labelCombinations,
+                                                                          List<List<PropertyType>> subjectCombinations) {
         List<MultisubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        // Create all possible pairs of property types
-        PropertyType[] types = PropertyType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                PropertyType type1 = types[i];
-                PropertyType type2 = types[j];
+        for (List<PropertyType> subjectCombination : subjectCombinations) {
+            PropertyType type1 = subjectCombination.getFirst();
+            PropertyType type2 = subjectCombination.get(1);
 
-                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+            if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                continue;
+            }
+
+            for (Quantifier quantifier : chosenQuantifiers) {
+                if (quantifier.type() != QuantifierType.RELATIVE) {
                     continue;
                 }
 
-                for (Quantifier quantifier : chosenQuantifiers) {
-                    if (quantifier.type() != QuantifierType.RELATIVE) {
-                        continue;
-                    }
-
-                    for (Label qualifier : chosenQualifiers) {
-                        for (List<Label> labelCombination : labelCombinations) {
-                            if (labelCombination.contains(qualifier)) {
-                                continue;
-                            }
-
-                            MultisubjectSummary summary = new MultisubjectSummary(
-                                    quantifier,
-                                    qualifier,
-                                    labelCombination,
-                                    type1,
-                                    type2,
-                                    propertiesByType,
-                                    attributeExtractors,
-                                    true  // Form 3: qualifier applies to P₁
-                            );
-                            summaries.add(summary);
+                for (Label qualifier : chosenQualifiers) {
+                    for (List<Label> labelCombination : labelCombinations) {
+                        if (labelCombination.contains(qualifier)) {
+                            continue;
                         }
+
+                        MultisubjectSummary summary = new MultisubjectSummary(
+                                quantifier,
+                                qualifier,
+                                labelCombination,
+                                MultiSubjectForm.THIRD,
+                                type1,
+                                type2,
+                                propertiesByType,
+                                attributeExtractors
+                        );
+                        summaries.add(summary);
                     }
                 }
             }
@@ -419,40 +425,40 @@ public class SummaryMachine {
         return summaries;
     }
 
-    public List<MultisubjectSummary> createFourthTypeMultisubjectSummaries(List<List<Label>> chosenLabels) {
+    public List<MultisubjectSummary> createFourthTypeMultisubjectSummaries(List<List<Label>> labelCombinations,
+                                                                           List<List<PropertyType>> subjectCombinations) {
         List<MultisubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
-        PropertyType[] types = PropertyType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                PropertyType type1 = types[i];
-                PropertyType type2 = types[j];
+        for (List<PropertyType> subjectCombination : subjectCombinations) {
+            PropertyType type1 = subjectCombination.getFirst();
+            PropertyType type2 = subjectCombination.get(1);
 
-                if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
-                    continue;
-                }
+            if (propertiesByType.get(type1).isEmpty() || propertiesByType.get(type2).isEmpty()) {
+                continue;
+            }
 
-                for (List<Label> labelCombination : labelCombinations) {
-                    MultisubjectSummary summary = new MultisubjectSummary(
-                            null,  // No quantifier for Form 4
-                            null,  // No qualifier for Form 4
-                            labelCombination,
-                            type1,
-                            type2,
-                            propertiesByType,
-                            attributeExtractors,
-                            false
-                    );
-                    summaries.add(summary);
-                }
+            for (List<Label> labelCombination : labelCombinations) {
+                MultisubjectSummary summary = new MultisubjectSummary(
+                        null,  // No quantifier for Form 4
+                        null,  // No qualifier for Form 4
+                        labelCombination,
+                        MultiSubjectForm.FOURTH,
+                        type1,
+                        type2,
+                        propertiesByType,
+                        attributeExtractors
+                );
+                summaries.add(summary);
             }
         }
 
         logger.info("🔄 Generated " + summaries.size() + " Form 4 multisubject summaries");
         return summaries;
     }
-    // ==== UTILS ====
+
+    // ==========================================================
+    // ========================= UTILS ==========================
+    // ==========================================================
 
     public List<String> getLinguisticVariablesNames() {
         return linguisticVariables.stream().map(LinguisticVariable::name).toList();
