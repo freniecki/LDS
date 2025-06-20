@@ -8,8 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
-import pl.frot.model.CustomLabelDto;
-import pl.frot.model.NewLabelDto;
+import pl.frot.model.dtos.CustomLabelDto;
+import pl.frot.model.dtos.NewLabelDto;
 import pl.frot.model.SummaryMachine;
 
 import java.io.IOException;
@@ -24,21 +24,18 @@ public class MainController {
     private TopController topController;
     @Getter
     private SummaryController summaryController;
-    @Getter
-    private MultisubjectSummaryController multisubjectSummaryController;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private SummaryMachine summaryMachine;
 
-    // Views for switching between single and multisubject summaries
+    @FXML
+    private HBox topContainer;
+    @FXML
+    private VBox parametersContainer;
+    @FXML
     @Getter
-    private Node singleSubjectView;
-    @Getter
-    private Node multisubjectView;
-
-    @FXML private HBox topContainer;
-    @FXML private VBox parametersContainer;
-    @FXML @Getter private Pane summaryContainer;
+    private Pane summaryContainer;
 
     @FXML
     public void initialize() throws IOException {
@@ -55,66 +52,23 @@ public class MainController {
         topController = topLoader.getController();
         topController.setMainController(this);
 
-        // Load single subject summary view
+        // Load summary view
         FXMLLoader summaryLoader = new FXMLLoader(getClass().getResource("summaries.fxml"));
-        singleSubjectView = summaryLoader.load();
+        summaryContainer.getChildren().add(summaryLoader.load());
         summaryController = summaryLoader.getController();
         summaryController.setMainController(this);
-
-        // Load multisubject summary view
-        FXMLLoader multisubjectLoader = new FXMLLoader(getClass().getResource("multisubject-summaries.fxml"));
-        multisubjectView = multisubjectLoader.load();
-        multisubjectSummaryController = multisubjectLoader.getController();
-        multisubjectSummaryController.setMainController(this);
-
-        // Show single subject view by default
-        summaryContainer.getChildren().add(singleSubjectView);
     }
 
-    // ===== SINGLE SUBJECT METHODS =====
+    // ===== SUMMARIZING =====
 
-    public void createSingleSubjectSummaries() {
-        showSingleSubjectView();
-        summaryController.createSingleSubjectSummaries();
-    }
-
-    public void showSingleSubjectView() {
-        summaryContainer.getChildren().clear();
-        summaryContainer.getChildren().add(singleSubjectView);
-    }
-
-    // ===== MULTISUBJECT METHODS =====
-
-    public void createMultisubjectSummaries() {
-        showMultisubjectView();
-        multisubjectSummaryController.createMultisubjectSummaries();
-    }
-
-    public void showMultisubjectView() {
-        summaryContainer.getChildren().clear();
-        summaryContainer.getChildren().add(multisubjectView);
+    public void createSummaries() {
+        summaryController.createSummaries();
     }
 
     // ===== ADD CUSTOM LABEL =====
 
     public void addCustomLabel(NewLabelDto newLabelDto) {
         CustomLabelDto customLabelDto = summaryMachine.isNewLabelValid(newLabelDto);
-        parametersController.addNewCustom(customLabelDto);
-    }
-
-    // ===== UTILITY METHODS =====
-
-    /**
-     * Check if single subject view is currently active
-     */
-    public boolean isSingleSubjectViewActive() {
-        return summaryContainer.getChildren().contains(singleSubjectView);
-    }
-
-    /**
-     * Check if multisubject view is currently active
-     */
-    public boolean isMultisubjectViewActive() {
-        return summaryContainer.getChildren().contains(multisubjectView);
+        parametersController.addNewSummarizer(customLabelDto);
     }
 }

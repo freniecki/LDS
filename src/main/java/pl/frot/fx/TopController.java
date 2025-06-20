@@ -9,9 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import pl.frot.fuzzy.base.*;
-import pl.frot.model.LabelType;
-import pl.frot.model.MembershipType;
-import pl.frot.model.NewLabelDto;
+import pl.frot.model.enums.LabelType;
+import pl.frot.model.enums.MembershipType;
+import pl.frot.model.dtos.NewLabelDto;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -22,10 +22,9 @@ public class TopController {
 
     private MainController mainController;
 
-    @FXML private Button createSingleSubjectSummariesButton;
+    @FXML private Button createSummariesButton;
     @FXML private Button saveSummariesButton;
     @FXML private Button createNewLabelButton;
-    @FXML private Button createMultisubjectSummariesButton;
 
     @FXML private TextField newLabelNameTextField;
     @FXML private ComboBox<LabelType> labelTypeComboBox;
@@ -42,11 +41,8 @@ public class TopController {
 
     @FXML
     private void initialize() {
-        createSingleSubjectSummariesButton.setPadding(new Insets(10));
-        createSingleSubjectSummariesButton.setText("Stwórz podsumowania jednopodmiotowe");
-
-        createMultisubjectSummariesButton.setPadding(new Insets(10));
-        createMultisubjectSummariesButton.setText("Stwórz podsumowania wielopodmiotowe");
+        createSummariesButton.setPadding(new Insets(10));
+        createSummariesButton.setText("Stwórz podsumowania");
 
         saveSummariesButton.setPadding(new Insets(10));
         saveSummariesButton.setText("Zapisz podsumowania");
@@ -75,21 +71,11 @@ public class TopController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
-        createSingleSubjectSummariesButton.setOnAction(e -> mainController.createSingleSubjectSummaries());
-        createMultisubjectSummariesButton.setOnAction(e -> mainController.createMultisubjectSummaries());
+        createSummariesButton.setOnAction(e -> mainController.createSummaries());
 
         List<String> lvNames = mainController.getSummaryMachine().getLinguisticVariablesNames();
         linguisticVariableComboBox.setItems(FXCollections.observableArrayList(lvNames));
         linguisticVariableComboBox.setValue(lvNames.getFirst());
-
-        // Update save button to work with both views
-        saveSummariesButton.setOnAction(e -> {
-            if (mainController.isSingleSubjectViewActive()) {
-                mainController.getSummaryController().saveSummaries();
-            } else if (mainController.isMultisubjectViewActive()) {
-                mainController.getMultisubjectSummaryController().saveSummaries();
-            }
-        });
     }
 
     public void createNewLabel() {
