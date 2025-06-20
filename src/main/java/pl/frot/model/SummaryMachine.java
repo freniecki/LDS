@@ -216,10 +216,6 @@ public class SummaryMachine {
                                                                             List<List<Label>> labelCombinations,
                                                                             List<Double> measureWages) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
-
-        logger.info("🔄 Generated " + labelCombinations.size() + " label combinations");
-
         for (Quantifier quantifier : chosenQuantifiers) {
             for (List<Label> labelCombination : labelCombinations) {
                 SingleSubjectSummary summary = new SingleSubjectSummary(
@@ -242,15 +238,13 @@ public class SummaryMachine {
                                                                              List<List<Label>> labelCombinations, List<Double> measureWages) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
-        List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
-
         for (Quantifier quantifier : chosenQuantifiers) {
             if (quantifier.type() == QuantifierType.ABSOLUTE) {
                 continue;
             }
 
-            for (Label qualifier : chosenQualifiers) {           // ← Iteruj po wybranych kwalifikatorach
-                for (List<Label> summarizers : labelCombinations) { // ← Wszystkie jako sumaryzatory
+            for (Label qualifier : chosenQualifiers) {
+                for (List<Label> summarizers : labelCombinations) {
                     if (summarizers.contains(qualifier)) {
                         continue;
                     }
@@ -284,10 +278,10 @@ public class SummaryMachine {
         summarizerCombinations = summarizerCombinations.stream().filter(s -> s.size() > 1).toList();
         logger.info("Summarizers combinations: " + summarizerCombinations);
 
-        List<List<PropertyType>> subjectsLists = subjects.stream().map(List::of).toList();
-        List<List<PropertyType>> subjectCombinations = SetOperations.getCrossListCombinations(subjectsLists, 2);
-        logger.info("Subjects combinations: " + subjectCombinations);
-        subjectCombinations = subjectCombinations.stream().filter(s -> s.size() > 1).toList();
+        List<List<PropertyType>> subjectCombinations = List.of(
+                List.of(subjects.getFirst(), subjects.get(1)),
+                List.of(subjects.get(1), subjects.getFirst())
+        );
         logger.info("Subjects combinations: " + subjectCombinations);
 
 
