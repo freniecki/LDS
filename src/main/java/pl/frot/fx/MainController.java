@@ -2,7 +2,6 @@ package pl.frot.fx;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -13,6 +12,7 @@ import pl.frot.model.dtos.NewLabelDto;
 import pl.frot.model.SummaryMachine;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class MainController {
@@ -73,6 +73,6 @@ public class MainController {
 
     public void addCustomLabel(NewLabelDto newLabelDto) {
         CustomLabelDto customLabelDto = summaryMachine.isNewLabelValid(newLabelDto);
-        parametersController.addNewSummarizer(customLabelDto);
+        parametersController.addCustomLabel(customLabelDto);
     }
 }

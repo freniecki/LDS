@@ -9,6 +9,8 @@ import javafx.scene.control.cell.CheckBoxTreeCell;
 import lombok.Setter;
 import pl.frot.fuzzy.summaries.Label;
 import pl.frot.fuzzy.summaries.LinguisticVariable;
+import pl.frot.fuzzy.summaries.Quantifier;
+import pl.frot.fuzzy.summaries.QuantifierType;
 import pl.frot.model.dtos.CustomLabelDto;
 import pl.frot.model.enums.PropertyType;
 
@@ -114,6 +116,14 @@ public class ParametersController {
 
     // ==== ADD NEW LABEL ====
 
+    public void addCustomLabel(CustomLabelDto customLabelDto) {
+        switch (customLabelDto.labelType()) {
+            case SUMMARIZER, QUALIFIER -> addNewSummarizer(customLabelDto);
+            case QUANTIFIER_ABSOLUTE -> addNewQuantifier(customLabelDto, QuantifierType.ABSOLUTE);
+            case QUANTIFIER_RELATIVE -> addNewQuantifier(customLabelDto, QuantifierType.RELATIVE);
+        }
+    }
+
     public void addNewSummarizer(CustomLabelDto customLabelDto) {
         Label label = new Label(customLabelDto.name(), customLabelDto.fuzzySet(), customLabelDto.lvName());
         CheckBoxTreeItem<Object> labelTreeItem = new CheckBoxTreeItem<>(label);
@@ -125,5 +135,10 @@ public class ParametersController {
                 break;
             }
         }
+    }
+
+    private void addNewQuantifier(CustomLabelDto customLabelDto, QuantifierType quantifierType) {
+        Quantifier quantifier = new Quantifier(customLabelDto.name(), quantifierType, customLabelDto.fuzzySet());
+        mainController.getSummaryMachine().getQuantifiers().add(quantifier);
     }
 }
