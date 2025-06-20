@@ -2,7 +2,7 @@ package pl.frot.fuzzy.summaries;
 
 import lombok.Getter;
 import pl.frot.data.Property;
-import pl.frot.model.PropertyType;
+import pl.frot.model.enums.PropertyType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -17,8 +17,8 @@ public class MultisubjectSummary {
     private final Label qualifier;
     @Getter
     private final List<Label> summarizers;
-    @Getter
-    private final boolean qualifierAppliesTo1; // true = P₁, false = P₂
+
+    private final MultiSubjectForm multiSubjectForm;
 
     // Two populations to compare
     private final List<Property> population1;  // P₁
@@ -31,11 +31,11 @@ public class MultisubjectSummary {
     public MultisubjectSummary(Quantifier quantifier,
                                Label qualifier,
                                List<Label> summarizers,
+                               MultiSubjectForm multiSubjectForm,
                                PropertyType populationType1,
                                PropertyType populationType2,
                                Map<PropertyType, List<Property>> propertiesByType,
-                               Map<String, Function<Property, Double>> attributeExtractors,
-                               boolean qualifierAppliesTo1) {
+                               Map<String, Function<Property, Double>> attributeExtractors) {
         this.quantifier = quantifier;
         this.qualifier = qualifier;
 
@@ -45,12 +45,13 @@ public class MultisubjectSummary {
         }
         this.summarizers = summarizers;
 
+        this.multiSubjectForm = multiSubjectForm;
+
         this.populationType1 = populationType1;
         this.populationType2 = populationType2;
         this.population1 = propertiesByType.get(populationType1);
         this.population2 = propertiesByType.get(populationType2);
         this.attributeExtractors = attributeExtractors;
-        this.qualifierAppliesTo1 = qualifierAppliesTo1;
     }
 
     /**
@@ -68,13 +69,12 @@ public class MultisubjectSummary {
             return 0.0;
         }
 
-        if (qualifier == null) {
-            return calculateForm1();
-        } else if (qualifierAppliesTo1) {
-            return calculateForm3(); // Q P₁ będących S₂ w odniesieniu do P₂ jest S₁
-        } else {
-            return calculateForm2(); // Q P₁ w odniesieniu do P₂ będących S₂ jest S₁
-        }
+        return switch (multiSubjectForm) {
+            case FIRST -> calculateForm1();
+            case SECOND -> calculateForm2();
+            case THIRD -> calculateForm3();
+            case FOURTH -> calculateForm4();
+        };
     }
 
     /**
@@ -287,66 +287,34 @@ public class MultisubjectSummary {
         return 0.0;
     }
 
-
-    /**
-     * Get degree of truth for specific form (1-4)
-     */
-    public int getFormNumber() {
-        if (quantifier == null) {
-            return 4;  // Form 4: no quantifier
-        } else if (qualifier == null) {
-            return 1;  // Form 1: quantifier but no qualifier
-        } else if (qualifierAppliesTo1) {
-            return 3;  // Form 3: qualifier applies to P₁
-        } else {
-            return 2;  // Form 2: qualifier applies to P₂
-        }
-    }
-
-    public double calculateFormByNumber(int formNumber) {
-        return switch(formNumber) {
-            case 1 -> calculateForm1();
-            case 2 -> calculateForm2();
-            case 3 -> calculateForm3();
-            case 4 -> calculateForm4();
-            default -> 0.0;
-        };
-    }
     // ===== GETTERS AND TOSTRING =====
 
     @Override
     public String toString() {
         StringBuilder summarizerValue = new StringBuilder(" jest ");
-        summarizerValue.append(summarizers.get(0).getName());
+        summarizerValue.append(summarizers.getFirst().getName());
         for (int i = 1; i < summarizers.size(); i++) {
             summarizerValue.append(" i ").append(summarizers.get(i).getName());
         }
 
-        if (quantifier == null) {
-            // Form 4: "Więcej P₁ niż P₂ jest S₁"
-            return "Więcej nieruchomości w " + populationType1.propertyTypeName
+        return switch (multiSubjectForm) {
+            case FIRST -> quantifier.name()
+                    + " nieruchomości w " + populationType1.propertyTypeName
+                    + " w odniesieniu do " + populationType2.propertyTypeName
+                    + summarizerValue;
+            case SECOND -> quantifier.name()
+                    + " nieruchomości w " + populationType1.propertyTypeName
+                    + " w odniesieniu do " + populationType2.propertyTypeName
+                    + " będących " + qualifier.getName()
+                    + summarizerValue;
+            case THIRD -> quantifier.name()
+                    + " nieruchomości w " + populationType1.propertyTypeName
+                    + " będących " + qualifier.getName()
+                    + " w odniesieniu do " + populationType2.propertyTypeName
+                    + summarizerValue;
+            case FOURTH -> "Więcej nieruchomości w " + populationType1.propertyTypeName
                     + " niż w " + populationType2.propertyTypeName
                     + summarizerValue;
-        } else if (qualifier == null) {
-            // Form 1
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " w odniesieniu do " + populationType2.propertyTypeName
-                    + summarizerValue;
-        } else if (qualifierAppliesTo1) {
-            // Form 3
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " będących " + qualifier.getName()
-                    + " w odniesieniu do " + populationType2.propertyTypeName
-                    + summarizerValue;
-        } else {
-            // Form 2
-            return quantifier.name()
-                    + " nieruchomości w " + populationType1.propertyTypeName
-                    + " w odniesieniu do " + populationType2.propertyTypeName
-                    + " będących " + qualifier.getName()
-                    + summarizerValue;
-        }
+        };
     }
 }
