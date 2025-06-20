@@ -201,7 +201,8 @@ public class SummaryMachine {
     public List<SingleSubjectSummary> createSingleSubjectSummaries(List<Quantifier> quantifiers, List<Label> qualifiers,
                                                                    List<List<Label>> summarizers, List<Double> measureWages) {
 
-        List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, summarizers);
+        List<List<Label>> labelCombination = SetOperations.getCrossListCombinations(summarizers, 3);
+        labelCombination = labelCombination.stream().filter(c -> c.size() > 1).toList();
 
         List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, labelCombination, measureWages);
         if (!qualifiers.isEmpty()) {

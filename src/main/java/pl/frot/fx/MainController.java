@@ -65,6 +65,10 @@ public class MainController {
         summaryController.createSummaries(measureWages);
     }
 
+    public void saveSummaries() {
+        summaryController.saveSummaries();
+    }
+
     // ===== ADD CUSTOM LABEL =====
 
     public void addCustomLabel(NewLabelDto newLabelDto) {

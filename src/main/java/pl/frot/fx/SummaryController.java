@@ -176,7 +176,7 @@ public class SummaryController {
                 new SimpleDoubleProperty(cellData.getValue().optimal()).asObject());
         tOptCol.setCellFactory(SummaryController.getDoubleCellFactory(2));
 
-        summaryTable.getColumns().addAll(indexCol,selectedCol,summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
+        summaryTable.getColumns().addAll(indexCol, selectedCol, summaryTextCol, t1Col, t2Col, t3Col, t4Col, t5Col,
                 t6Col, t7Col, t8Col, t9Col, t10Col, t11Col, tOptCol);
         summaryTable.setEditable(true);
 
@@ -187,7 +187,9 @@ public class SummaryController {
 
     public void saveSummaries() {
         List<SummaryDto> selectedSummaries = summaryTable.getItems().stream().filter(SummaryDto::isSelected).toList();
-        List<String> summaries = selectedSummaries.stream().map(SummaryDto::summary).toList();
+        List<String> summaries = selectedSummaries.stream().map(
+                s -> s.summary() + " | T1=" + s.degreeOfTruth()
+        ).toList();
 
         mainController.getSummaryMachine().saveToFile(summaries);
     }
