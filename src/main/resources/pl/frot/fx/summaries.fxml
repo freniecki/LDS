@@ -8,8 +8,5 @@
       fx:controller="pl.frot.fx.SummaryController"
       prefHeight="930.0" prefWidth="1520.0">
 
-    <TableView fx:id="summaryTable" prefHeight="930.0" prefWidth="1520.0">
-
-    </TableView>
-
+    <TableView fx:id="summaryTable" prefHeight="930.0" prefWidth="1520.0"/>
 </Pane>

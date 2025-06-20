@@ -10,8 +10,6 @@
 
     <TreeView fx:id="linguisticVariableTreeView"/>
 
-    <TreeView fx:id="qualifiersTreeView"/>
-
-    <TreeView fx:id="quantifiersTreeView"/>
+    <TreeView fx:id="subjectsTreeView"/>
 
 </VBox>

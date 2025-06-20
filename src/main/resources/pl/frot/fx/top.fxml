@@ -10,8 +10,7 @@
       fx:controller="pl.frot.fx.TopController"
       prefHeight="150.0" prefWidth="1920.0" spacing="15.0" alignment="CENTER">
 
-    <Button fx:id="createSingleSubjectSummariesButton" />
-    <Button fx:id="createMultisubjectSummariesButton" />
+    <Button fx:id="createSummariesButton" />
     <Button fx:id="saveSummariesButton" />
 
     <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>
