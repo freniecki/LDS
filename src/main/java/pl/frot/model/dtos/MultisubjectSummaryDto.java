@@ -1,4 +1,4 @@
-package pl.frot.model;
+package pl.frot.model.dtos;
 
 import javafx.beans.property.SimpleBooleanProperty;
 

@@ -1,4 +1,4 @@
-package pl.frot.model;
+package pl.frot.model.enums;
 
 public enum  PropertyType {
     LOS_ANGELES_AREA("region Los Angeles"),
