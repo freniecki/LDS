@@ -11,12 +11,15 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.util.Callback;
 import lombok.Setter;
 import pl.frot.fuzzy.summaries.Label;
+import pl.frot.fuzzy.summaries.MultisubjectSummary;
 import pl.frot.fuzzy.summaries.Quantifier;
 import pl.frot.fuzzy.summaries.SingleSubjectSummary;
-import pl.frot.model.SummaryDto;
+import pl.frot.model.dtos.SummaryDto;
+import pl.frot.model.enums.PropertyType;
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class SummaryController {
     private static final Logger logger = Logger.getLogger(SummaryController.class.getName());
@@ -26,6 +29,66 @@ public class SummaryController {
 
     @FXML
     private TableView<SummaryDto> summaryTable;
+
+    public void createSummaries() {
+        List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
+        List<Label> qualifiers = labels.stream().flatMap(List::stream).toList();
+        List<Quantifier> quantifiers = mainController.getSummaryMachine().getQuantifiers();
+        List<PropertyType> subjects = mainController.getParametersController().getToggledSubjects();
+
+        List<SummaryDto> summaryDtoList = createSingleSubjectSummaries(labels, qualifiers, quantifiers);
+        List<SummaryDto> multiSubjectSummaries = createMultiSubjectSummaries(labels, qualifiers, quantifiers, subjects);
+        summaryDtoList.addAll(multiSubjectSummaries);
+
+        addSummariesToTable(summaryDtoList);
+    }
+
+    private List<SummaryDto> createSingleSubjectSummaries(List<List<Label>> labels, List<Label> qualifiers, List<Quantifier> quantifiers) {
+        List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
+                quantifiers, qualifiers, labels);
+
+        return summaries.stream()
+                .map(s -> new SummaryDto(
+                        s.toString(),
+                        s.getMeasures().get("T1"),
+                        s.getMeasures().get("T2"),
+                        s.getMeasures().get("T3"),
+                        s.getMeasures().get("T4"),
+                        s.getMeasures().get("T5"),
+                        s.getMeasures().get("T6"),
+                        s.getMeasures().get("T7"),
+                        s.getMeasures().get("T8"),
+                        s.getMeasures().get("T9"),
+                        s.getMeasures().get("T10"),
+                        s.getMeasures().get("T11"),
+                        s.getMeasures().get("T*"),
+                        new SimpleBooleanProperty(false))
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<SummaryDto> createMultiSubjectSummaries(List<List<Label>> labels, List<Label> qualifiers, List<Quantifier> quantifiers, List<PropertyType> subjects) {
+        List<MultisubjectSummary> summaries = mainController.getSummaryMachine()
+                .createMultisubjectSummaries(quantifiers, qualifiers, labels, subjects);
+
+        return summaries.stream()
+                .map(s -> new SummaryDto(
+                        s.toString(),
+                        s.degreeOfTruth(),
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        Double.NaN,
+                        new SimpleBooleanProperty(false))
+                ).collect(Collectors.toList());
+    }
 
     private void addSummariesToTable(List<SummaryDto> summaryDtos) {
         summaryTable.getColumns().clear();
@@ -120,36 +183,6 @@ public class SummaryController {
         // Ustawiamy dane
         summaryTable.getItems().clear();
         summaryTable.getItems().addAll(summaryDtos);
-    }
-
-    public void createSingleSubjectSummaries() {
-        List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
-        List<Label> qualifiers = mainController.getParametersController().getToggledQualifiers();
-        List<Quantifier> quantifiers = mainController.getParametersController().getToggledQuantifiers();
-
-        List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
-                quantifiers, qualifiers, labels);
-
-        List<SummaryDto> summaryDtos = summaries.stream()
-                .map(s -> new SummaryDto(
-                        s.toString(),
-                        s.getMeasures().get("T1"),
-                        s.getMeasures().get("T2"),
-                        s.getMeasures().get("T3"),
-                        s.getMeasures().get("T4"),
-                        s.getMeasures().get("T5"),
-                        s.getMeasures().get("T6"),
-                        s.getMeasures().get("T7"),
-                        s.getMeasures().get("T8"),
-                        s.getMeasures().get("T9"),
-                        s.getMeasures().get("T10"),
-                        s.getMeasures().get("T11"),
-                        s.getMeasures().get("T*"),
-                        new SimpleBooleanProperty(false))
-                )
-                .toList();
-
-        addSummariesToTable(summaryDtos);
     }
 
     public void saveSummaries() {
