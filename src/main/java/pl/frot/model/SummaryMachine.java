@@ -199,19 +199,21 @@ public class SummaryMachine {
     // ==========================================================
 
     public List<SingleSubjectSummary> createSingleSubjectSummaries(List<Quantifier> quantifiers, List<Label> qualifiers,
-                                                                   List<List<Label>> summarizers) {
+                                                                   List<List<Label>> summarizers, List<Double> measureWages) {
 
         List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, summarizers);
 
+        List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, labelCombination, measureWages);
         if (!qualifiers.isEmpty()) {
-            allSummaries.addAll(createSecondTypeSingleSubjectSummaries(quantifiers, qualifiers, summarizers));
+            allSummaries.addAll(createSecondTypeSingleSubjectSummaries(quantifiers, qualifiers, labelCombination, measureWages));
         }
 
         return allSummaries;
     }
 
     public List<SingleSubjectSummary> createFirstTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers,
-                                                                            List<List<Label>> chosenLabels) {
+                                                                            List<List<Label>> labelCombinations,
+                                                                            List<Double> measureWages) {
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
 
@@ -224,7 +226,8 @@ public class SummaryMachine {
                         null,
                         labelCombination,
                         properties,
-                        attributeExtractors
+                        attributeExtractors,
+                        measureWages
                 );
 
                 summaries.add(summary);
@@ -235,7 +238,7 @@ public class SummaryMachine {
 
     public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers,
                                                                              List<Label> chosenQualifiers,
-                                                                             List<List<Label>> chosenLabels) {
+                                                                             List<List<Label>> labelCombinations, List<Double> measureWages) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         List<List<Label>> labelCombinations = SetOperations.getCrossListCombinations(chosenLabels, 3);
@@ -256,7 +259,8 @@ public class SummaryMachine {
                             qualifier,
                             summarizers,
                             properties,
-                            attributeExtractors
+                            attributeExtractors,
+                            measureWages
                     );
 
                     summaries.add(summary);

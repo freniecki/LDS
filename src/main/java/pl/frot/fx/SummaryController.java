@@ -30,22 +30,22 @@ public class SummaryController {
     @FXML
     private TableView<SummaryDto> summaryTable;
 
-    public void createSummaries() {
+    public void createSummaries(List<Double> measureWages) {
         List<List<Label>> labels = mainController.getParametersController().getToggledSummarizers();
         List<Label> qualifiers = labels.stream().flatMap(List::stream).toList();
         List<Quantifier> quantifiers = mainController.getSummaryMachine().getQuantifiers();
         List<PropertyType> subjects = mainController.getParametersController().getToggledSubjects();
 
-        List<SummaryDto> summaryDtoList = createSingleSubjectSummaries(labels, qualifiers, quantifiers);
+        List<SummaryDto> summaryDtoList = createSingleSubjectSummaries(labels, qualifiers, quantifiers, measureWages);
         List<SummaryDto> multiSubjectSummaries = createMultiSubjectSummaries(labels, qualifiers, quantifiers, subjects);
         summaryDtoList.addAll(multiSubjectSummaries);
 
         addSummariesToTable(summaryDtoList);
     }
 
-    private List<SummaryDto> createSingleSubjectSummaries(List<List<Label>> labels, List<Label> qualifiers, List<Quantifier> quantifiers) {
+    private List<SummaryDto> createSingleSubjectSummaries(List<List<Label>> labels, List<Label> qualifiers, List<Quantifier> quantifiers, List<Double> measureWages) {
         List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
-                quantifiers, qualifiers, labels);
+                quantifiers, qualifiers, labels, measureWages);
 
         return summaries.stream()
                 .map(s -> new SummaryDto(

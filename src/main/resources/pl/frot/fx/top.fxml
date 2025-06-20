@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextField?>
 
+<?import javafx.scene.control.CheckBox?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="pl.frot.fx.TopController"
@@ -13,10 +14,18 @@
     <Button fx:id="createSummariesButton" />
     <Button fx:id="saveSummariesButton" />
 
-    <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>
-    <ComboBox fx:id="labelTypeComboBox" />
-    <ComboBox fx:id="linguisticVariableComboBox" />
-    <ComboBox fx:id="membershipTypeComboBox" />
-    <GridPane fx:id="membershipParamsGridPane" alignment="CENTER"/>
-    <Button fx:id="createNewLabelButton" text="Dodaj etykietę"/>
+    <VBox alignment="CENTER" spacing="20">
+        <HBox alignment="CENTER" spacing="10">
+            <TextField fx:id="newLabelNameTextField" promptText="Custom label"/>
+            <ComboBox fx:id="labelTypeComboBox" />
+            <ComboBox fx:id="linguisticVariableComboBox" />
+            <ComboBox fx:id="membershipTypeComboBox" />
+            <GridPane fx:id="membershipParamsGridPane" alignment="CENTER"/>
+            <Button fx:id="createNewLabelButton" text="Dodaj etykietę"/>
+        </HBox>
+        <HBox alignment="CENTER" spacing="10">
+            <CheckBox fx:id="useCustomWages"/>
+            <GridPane fx:id="measuresWagesGridPane" />
+        </HBox>
+    </VBox>
 </HBox>

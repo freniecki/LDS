@@ -61,8 +61,8 @@ public class MainController {
 
     // ===== SUMMARIZING =====
 
-    public void createSummaries() {
-        summaryController.createSummaries();
+    public void createSummaries(List<Double> measureWages) {
+        summaryController.createSummaries(measureWages);
     }
 
     // ===== ADD CUSTOM LABEL =====

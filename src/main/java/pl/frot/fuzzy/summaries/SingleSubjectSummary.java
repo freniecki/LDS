@@ -21,11 +21,11 @@ public class SingleSubjectSummary {
     private final Map<String, Function<Property, Double>> attributeExtractors;
 
     @Getter
-    private Map<String, Double> measures;
+    private final Map<String, Double> measures = new LinkedHashMap<>();
 
     public SingleSubjectSummary(Quantifier quantifier, Label qualifier, List<Label> summarizers,
-                                List<Property> properties,
-                                Map<String, Function<Property, Double>> attributeExtractors) {
+                                List<Property> properties, Map<String, Function<Property, Double>> attributeExtractors,
+                                List<Double> measuresWages) {
         this.quantifier = quantifier;
         this.qualifier = qualifier;
         if (summarizers.isEmpty()) {
@@ -36,11 +36,10 @@ public class SingleSubjectSummary {
         this.properties = properties;
         this.attributeExtractors = attributeExtractors;
 
-        createMeasures();
+        createMeasures(measuresWages);
     }
 
-    private void createMeasures() {
-        measures = new LinkedHashMap<>();
+    private void createMeasures(List<Double> measuresWages) {
         measures.put("T1", degreeOfTruth());
         measures.put("T2", degreeOfImprecision());
         measures.put("T3", degreeOfCovering());
@@ -52,7 +51,7 @@ public class SingleSubjectSummary {
         measures.put("T9", degreeOfQualifierImprecision());
         measures.put("T10", degreeOfQualifierCardinality());
         measures.put("T11", qualifierLength());
-        measures.put("T*", optimalMeasure(List.of()));
+        measures.put("T*", optimalMeasure(measuresWages));
     }
 
     public double degreeOfTruth() {

@@ -3,17 +3,17 @@ package pl.frot.fx;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import pl.frot.fuzzy.base.*;
 import pl.frot.model.enums.LabelType;
 import pl.frot.model.enums.MembershipType;
 import pl.frot.model.dtos.NewLabelDto;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 
 public class TopController {
@@ -33,11 +33,14 @@ public class TopController {
 
     @FXML private ComboBox<MembershipType> membershipTypeComboBox;
     @FXML private GridPane membershipParamsGridPane;
+
+    @FXML private CheckBox useCustomWages;
+    @FXML private GridPane measuresWagesGridPane;
+
     private final Map<String, TextField> membershipParamsMap = new HashMap<>();
     private final String[] triangularParams = new String[]{"a", "b", "c"};
     private final String[] trapezoidalParams = new String[]{"a", "b", "c", "d"};
     private final String[] gaussianParams = new String[]{"center", "sigma"};
-
 
     @FXML
     private void initialize() {
@@ -47,6 +50,7 @@ public class TopController {
         saveSummariesButton.setPadding(new Insets(10));
         saveSummariesButton.setText("Zapisz podsumowania");
 
+        // ====== CUSTOM LABEL ======
         labelTypeComboBox.setItems(FXCollections.observableArrayList(LabelType.values()));
         labelTypeComboBox.setValue(LabelType.QUANTIFIER_ABSOLUTE);
 
@@ -67,11 +71,26 @@ public class TopController {
         });
 
         createNewLabelButton.setOnAction(e -> createNewLabel());
+
+        // ====== CUSTOM WAGES ======
+        useCustomWages.setSelected(false);
+        for (int i = 0; i < 11; i++) {
+            measuresWagesGridPane.add(new Label("T" + (i + 1)), 2 * i, 0);
+            measuresWagesGridPane.add(createPositiveDoubleField(),  2 * i + 1, 0);
+        }
     }
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
-        createSummariesButton.setOnAction(e -> mainController.createSummaries());
+        createSummariesButton.setOnAction(e -> {
+            if (useCustomWages.isSelected()) {
+                validateCustomWages();
+                mainController.createSummaries(readMeasureWagesFromGrid());
+            } else {
+                mainController.createSummaries(List.of());
+            }
+        });
+        saveSummariesButton.setOnAction(e -> mainController.saveSummaries());
 
         List<String> lvNames = mainController.getSummaryMachine().getLinguisticVariablesNames();
         linguisticVariableComboBox.setItems(FXCollections.observableArrayList(lvNames));
@@ -94,6 +113,18 @@ public class TopController {
                 memFun: %s
                 """.formatted(labelName, labelType, lvName, membershipFunction.getClass().getName()));
         mainController.addCustomLabel(new NewLabelDto(labelType, labelName, lvName, membershipFunction));
+    }
+
+    private void validateCustomWages() {
+        List<Double> wages = readMeasureWagesFromGrid();
+        if (wages.size() != 11) {
+            throw new IllegalStateException("Expected 11 wages, got: " + wages.size());
+        }
+
+        if (wages.stream().mapToDouble(Double::doubleValue).sum() != 1.0) {
+            logger.warning("Sum of wages is not equal to 1");
+            throw new IllegalStateException("Sum of wages is not equal to 1");
+        }
     }
 
     // ======== UTILS ========
@@ -143,5 +174,33 @@ public class TopController {
             params.add(Double.parseDouble(mapForReference.get(paramsLabel).getText()));
         }
         return params;
+    }
+
+    private List<Double> readMeasureWagesFromGrid() {
+        List<Double> params = new ArrayList<>();
+        var children = measuresWagesGridPane.getChildren();
+        for (int i = 0; i < 11; i++) {
+            TextField textField = (TextField) children.get(2 * i + 1);
+            params.add(Double.parseDouble(textField.textProperty().getValue()));
+        }
+        return params;
+    }
+
+    public static TextField createPositiveDoubleField() {
+        TextField textField = new TextField();
+        textField.setPromptText("0.00");
+        textField.setMaxWidth(50);
+
+        UnaryOperator<TextFormatter.Change> doubleFilter = change -> {
+            String newText = change.getControlNewText();
+            // Regex: liczba zmiennoprzecinkowa, pusta wartość jest OK, kropka może wystąpić maks raz
+            if (newText.matches("\\d*(\\.\\d*)?")) {
+                return change;
+            }
+            return null;
+        };
+
+        textField.setTextFormatter(new TextFormatter<>(doubleFilter));
+        return textField;
     }
 }
