@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -36,13 +37,33 @@ public class SummaryController {
         List<Quantifier> quantifiers = mainController.getSummaryMachine().getQuantifiers();
         List<PropertyType> subjects = mainController.getParametersController().getToggledSubjects();
 
-        List<SummaryDto> summaryDtoList = createSingleSubjectSummaries(labels, qualifiers, quantifiers, measureWages);
-        List<SummaryDto> multiSubjectSummaries = createMultiSubjectSummaries(labels, qualifiers, quantifiers, subjects);
-        summaryDtoList.addAll(multiSubjectSummaries);
+        try {
+            // Generuj podsumowania jednopodmiotowe (zawsze działają)
+            List<SummaryDto> summaryDtoList = createSingleSubjectSummaries(labels, qualifiers, quantifiers, measureWages);
 
-        addSummariesToTable(summaryDtoList);
+            // Generuj podsumowania wielopodmiotowe (mogą rzucić wyjątek)
+            List<SummaryDto> multiSubjectSummaries = createMultiSubjectSummaries(labels, qualifiers, quantifiers, subjects);
+            summaryDtoList.addAll(multiSubjectSummaries);
+
+            // Wyświetl wyniki
+            addSummariesToTable(summaryDtoList);
+
+        } catch (IllegalArgumentException e) {
+            // Pokaż błąd konfiguracji regionów
+            showErrorDialog("Błąd konfiguracji", e.getMessage());
+
+        } catch (Exception e) {
+            // Inne nieoczekiwane błędy
+            showErrorDialog("Błąd", "Nieoczekiwany błąd: " + e.getMessage());
+        }
     }
-
+    private void showErrorDialog(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
     private List<SummaryDto> createSingleSubjectSummaries(List<List<Label>> labels, List<Label> qualifiers, List<Quantifier> quantifiers, List<Double> measureWages) {
         List<SingleSubjectSummary> summaries = mainController.getSummaryMachine().createSingleSubjectSummaries(
                 quantifiers, qualifiers, labels, measureWages);
@@ -115,7 +136,7 @@ public class SummaryController {
         TableColumn<SummaryDto, String> summaryTextCol = new TableColumn<>("Podsumowanie");
         summaryTextCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().summary()));
-
+        summaryTextCol.setPrefWidth(900);
         TableColumn<SummaryDto, Double> t1Col = new TableColumn<>("T1");
         t1Col.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().degreeOfTruth()).asObject());

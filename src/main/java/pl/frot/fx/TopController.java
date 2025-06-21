@@ -11,6 +11,7 @@ import pl.frot.fuzzy.base.*;
 import pl.frot.model.enums.LabelType;
 import pl.frot.model.enums.MembershipType;
 import pl.frot.model.dtos.NewLabelDto;
+import pl.frot.model.enums.PropertyType;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -82,7 +83,24 @@ public class TopController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+
         createSummariesButton.setOnAction(e -> {
+            // SPRAWDŹ REGIONY PRZED GENEROWANIEM
+            List<PropertyType> subjects = mainController.getParametersController().getToggledSubjects();
+
+            if (subjects.size() == 1) {
+                showErrorDialog("Błąd konfiguracji",
+                        "Wybrano tylko 1 region (" + subjects.getFirst() + "). Wybierz dokładnie 2 regiony do porównania lub odznacz wszystkie.");
+                return;
+            }
+
+            if (subjects.size() > 2) {
+                showErrorDialog("Błąd konfiguracji",
+                        "Wybierz maksymalnie 2 regiony do porównania (zaznaczone: " + subjects.size() + ")");
+                return; // Przerwij - nie generuj podsumowań
+            }
+
+            // Jeśli OK - kontynuuj normalnie
             if (useCustomWages.isSelected()) {
                 validateCustomWages();
                 mainController.createSummaries(readMeasureWagesFromGrid());
@@ -90,11 +108,19 @@ public class TopController {
                 mainController.createSummaries(List.of());
             }
         });
+
         saveSummariesButton.setOnAction(e -> mainController.saveSummaries());
 
         List<String> lvNames = mainController.getSummaryMachine().getLinguisticVariablesNames();
         linguisticVariableComboBox.setItems(FXCollections.observableArrayList(lvNames));
         linguisticVariableComboBox.setValue(lvNames.getFirst());
+    }
+    private void showErrorDialog(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public void createNewLabel() {

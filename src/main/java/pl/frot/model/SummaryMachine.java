@@ -202,7 +202,6 @@ public class SummaryMachine {
                                                                    List<List<Label>> summarizers, List<Double> measureWages) {
 
         List<List<Label>> labelCombination = SetOperations.getCrossListCombinations(summarizers, 3);
-        labelCombination = labelCombination.stream().filter(c -> c.size() > 1).toList();
 
         List<SingleSubjectSummary> allSummaries = createFirstTypeSingleSubjectSummaries(quantifiers, labelCombination, measureWages);
         if (!qualifiers.isEmpty()) {
@@ -230,12 +229,15 @@ public class SummaryMachine {
                 summaries.add(summary);
             }
         }
+        logger.info("🔄 Generated " + summaries.size() + " Type 1 single subject summaries");
+
         return summaries;
     }
 
     public List<SingleSubjectSummary> createSecondTypeSingleSubjectSummaries(List<Quantifier> chosenQuantifiers,
                                                                              List<Label> chosenQualifiers,
-                                                                             List<List<Label>> labelCombinations, List<Double> measureWages) {
+                                                                             List<List<Label>> labelCombinations,
+                                                                             List<Double> measureWages) {
 
         List<SingleSubjectSummary> summaries = new ArrayList<>();
         for (Quantifier quantifier : chosenQuantifiers) {
@@ -245,7 +247,8 @@ public class SummaryMachine {
 
             for (Label qualifier : chosenQualifiers) {
                 for (List<Label> summarizers : labelCombinations) {
-                    if (summarizers.contains(qualifier)) {
+
+                    if (hasSemanticConflict(qualifier, summarizers)) {
                         continue;
                     }
 
@@ -262,20 +265,38 @@ public class SummaryMachine {
                 }
             }
         }
+        logger.info("🔄 Generated " + summaries.size() + " Type 2 single subject summaries");
 
         return summaries;
     }
+    private boolean hasSemanticConflict(Label qualifier, List<Label> summarizers) {
+        String qualifierAttribute = qualifier.getAttributeName();
 
-    // ==========================================================
+        for (Label summarizer : summarizers) {
+            if (qualifierAttribute.equals(summarizer.getAttributeName())) {
+                // Jakikolwiek ten sam atrybut = konflikt
+                // Eliminuje zarówno:
+                // - Sprzeczności: "będących przedwojenna jest powojenna"
+                // - Redundancje: "będących przedwojenna jest przedwojenna"
+                return true;
+            }
+        }
+        return false; // Różne atrybuty = OK
+    }// ==========================================================
     // ================ MULTISUBJECT SUMMARIZING ================
     // ==========================================================
 
     public List<MultisubjectSummary> createMultisubjectSummaries(List<Quantifier> quantifiers, List<Label> qualifiers,
                                                                  List<List<Label>> summarizers,
                                                                  List<PropertyType> subjects) {
+        if (subjects == null || subjects.isEmpty()) {
+            return new ArrayList<>();  // 0 regionów = OK, brak wielopodmiotowych
+        }
 
+        if (subjects.size() != 2) {
+            throw new IllegalArgumentException("Wybierz dokładnie 2 regiony do porównania (zaznaczone: " + subjects.size() + ")");
+        }
         List<List<Label>> summarizerCombinations = SetOperations.getCrossListCombinations(summarizers, 3);
-        summarizerCombinations = summarizerCombinations.stream().filter(s -> s.size() > 1).toList();
         logger.info("Summarizers combinations: " + summarizerCombinations);
 
         List<List<PropertyType>> subjectCombinations = List.of(
@@ -355,9 +376,13 @@ public class SummaryMachine {
 
                 for (Label qualifier : qualifiers) {
                     for (List<Label> labelCombination : labelCombinations) {
-                        if (labelCombination.contains(qualifier)) {
+
+
+                        // NOWA LINIJKA
+                        if (hasSemanticConflict(qualifier, labelCombination)) {
                             continue;
                         }
+
 
                         MultisubjectSummary summary = new MultisubjectSummary(
                                 quantifier,
@@ -400,7 +425,8 @@ public class SummaryMachine {
 
                 for (Label qualifier : chosenQualifiers) {
                     for (List<Label> labelCombination : labelCombinations) {
-                        if (labelCombination.contains(qualifier)) {
+
+                        if (hasSemanticConflict(qualifier, labelCombination)) {
                             continue;
                         }
 
