@@ -13,4 +13,9 @@ public enum  PropertyType {
     PropertyType(String s) {
         this.propertyTypeName = s;
     }
+
+    @Override
+    public String toString() {
+        return propertyTypeName;
+    }
 }

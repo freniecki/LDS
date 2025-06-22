@@ -14,11 +14,11 @@
     "name": "lot",
     "uod": [435, 1E6, 1000],
     "ranges": {
-      "kompaktowa": [435, 435, 1800, 2000],
-      "przytulna": [1800, 2000, 4000, 5000],
-      "przestronna": [4000, 5000, 8000, 10000],
-      "obszerna": [8000, 10000, 17000, 20000],
-      "rozległa": [17000, 20000, 1E6, 1E6]
+      "kompaktowa działka": [435, 435, 1800, 2000],
+      "przytulna działka": [1800, 2000, 4000, 5000],
+      "przestronna działka": [4000, 5000, 8000, 10000],
+      "obszerna działka": [8000, 10000, 17000, 20000],
+      "rozległa działka": [17000, 20000, 1E6, 1E6]
     }
   },
   {
@@ -26,10 +26,10 @@
     "uod": [400, 16000, 100],
     "ranges": {
       "kawalerskiego metrażu": [400, 400, 500, 600],
-      "małym mieszkaniem": [500, 600, 1200, 1300],
-      "przestrzenna": [1200, 1300, 2000, 2200],
-      "ponad standard": [2000, 2200, 3200, 3500],
-      "ogromna": [3200, 3500, 16000, 16000]
+      "małym metrażem": [500, 600, 1200, 1300],
+      "przestrzennego metrażu": [1200, 1300, 2000, 2200],
+      "metrażu ponad standard": [2000, 2200, 3200, 3500],
+      "ogromnego metrażu": [3200, 3500, 16000, 16000]
     }
   },
   {
