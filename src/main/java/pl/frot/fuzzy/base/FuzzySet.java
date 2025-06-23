@@ -50,7 +50,7 @@ public class FuzzySet<T> {
     }
 
     public double getDegreeOfFuzziness() {
-        return getSigmaCount() / domain.getLength();
+        return (double) getSupport().size() / domain.getSamples().size();
     }
 
     public double getHeight() {
@@ -82,7 +82,7 @@ public class FuzzySet<T> {
     }
 
     public void normalize() {
-        // dupa
+
     }
 
     public boolean isConvex() {
